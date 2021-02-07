@@ -215,4 +215,5 @@ pattern_feat feature dim:  646
 if __name__ == '__main__':
     # NOTE: rmbr to use allmapped_canon_{phase}.pickle
 
+    # TODO: parse args
     # setup args.data_folder
