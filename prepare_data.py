@@ -165,7 +165,7 @@ def get_template_idx(temps_filtered, task):
     #         if len(matches) > 0:
     #             return rxn_idx, temp_idx # template_idx = label
     # logging.info(rxn_smi)
-    return rxn_idx, 9999 # no template matching
+    return rxn_idx, -1 # no template matching
 
 def match_templates(args):
     logging.info(f'Loading templates from file: {args.templates_file}')
@@ -197,6 +197,7 @@ def match_templates(args):
         # make CSV file to save labels (template_idx) & rxn data for monitoring training
         col_names = ['rxn_idx', 'prod_smi', 'rcts_smi', 'temp_idx', 'template']
         rows = []
+        labels = []
         found = 0
         get_template_partial = partial(get_template_idx, temps_filtered)
         for result in tqdm(pool.imap_unordered(get_template_partial, tasks),
@@ -210,17 +211,23 @@ def match_templates(args):
             # Sometimes stereochem takes another canonicalization...
             rcts_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(rcts_smi_nomap), True)
 
-            template = temps_filtered[template_idx] if template_idx != 9999 else ''
+            template = temps_filtered[template_idx] if template_idx != -1 else ''
             rows.append([
                 rxn_idx,
                 phase_prod_smi_nomap[rxn_idx],
                 rcts_smi_nomap,
+                template,
                 template_idx,
-                template
             ])
-            found += (template_idx != 9999)
+            labels.append(template_idx)
+            found += (template_idx != -1)
         
         logging.info(f'Template coverage: {found / len(tasks) * 100:.2f}%')
+        labels = np.array(labels)
+        np.save(
+            args.data_folder / f"{args.output_file_prefix}_labels_{phase}",
+            labels
+        )
         with open(
             args.data_folder /
             f"{args.output_file_prefix}_csv_{phase}.csv", 'w'
@@ -288,7 +295,7 @@ if __name__ == '__main__':
     if not (args.data_folder / args.templates_file).exists():
         # ~40 sec on 40k train rxn_smi on 16 cores
         get_train_templates(args)
-    if True : # not (args.data_folder / f"{args.output_file_prefix}_csv_train.csv").exists():
+    if True: # not (args.data_folder / f"{args.output_file_prefix}_csv_train.csv").exists():
         # ~3 min on 40k train rxn_smi on 16 cores
         match_templates(args)
     

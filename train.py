@@ -94,9 +94,11 @@ def parse_args():
                         help="npz file of product fingerprints",
                         type=str)
     parser.add_argument("--labels_file_prefix",
-                        help="csv file of labels",
+                        help="npy file of labels",
                         type=str)
-
+    parser.add_argument("--csv_file_prefix",
+                        help="csv file of various metadata about the rxn",
+                        type=str)
     parser.add_argument("--radius", help="Fingerprint radius", type=int, default=2)
     parser.add_argument("--fp_size", help="Fingerprint size", type=int, default=32681)
     # parser.add_argument("--fp_type", help='Fingerprint type ["count", "bit"]', type=str, default="count")
@@ -127,9 +129,11 @@ if __name__ == '__main__':
         args.data_folder = Path(args.data_folder)
 
     if args.labels_file_prefix is None:
-        args.labels_file_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_csv'
+        args.labels_file_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_labels'
     if args.prodfps_file_prefix is None:
         args.prodfps_file_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_prod_fps'
-
+    if args.csv_file_prefix is None:
+        args.csv_file_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_csv'
+        
     model = train(args)
     test(model, args)
