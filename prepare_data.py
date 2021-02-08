@@ -139,7 +139,9 @@ def get_template_idx(temps_filtered, task):
     p = rxn_smi.split('>>')[-1]
     rxn = (rxn_idx, r, p)
     rxn_idx, rxn_template = get_tpl(rxn)
-    p_temp = cano_smarts(rxn_template['products']) # reaction_smarts
+    if 'reaction_smarts' not in rxn_template:
+        return rxn_idx, -1 # unable to extract template
+    p_temp = cano_smarts(rxn_template['products'])
     r_temp = cano_smarts(rxn_template['reactants'])
     cano_temp = r_temp + '>>' + p_temp
 
@@ -165,7 +167,7 @@ def get_template_idx(temps_filtered, task):
     #         if len(matches) > 0:
     #             return rxn_idx, temp_idx # template_idx = label
     # logging.info(rxn_smi)
-    return rxn_idx, -1 # no template matching
+    return rxn_idx, len(temps_filtered) # no template matching
 
 def match_templates(args):
     logging.info(f'Loading templates from file: {args.templates_file}')
@@ -211,7 +213,7 @@ def match_templates(args):
             # Sometimes stereochem takes another canonicalization...
             rcts_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(rcts_smi_nomap), True)
 
-            template = temps_filtered[template_idx] if template_idx != -1 else ''
+            template = temps_filtered[template_idx] if template_idx != len(temps_filtered) else ''
             rows.append([
                 rxn_idx,
                 phase_prod_smi_nomap[rxn_idx],
@@ -220,7 +222,7 @@ def match_templates(args):
                 template_idx,
             ])
             labels.append(template_idx)
-            found += (template_idx != -1)
+            found += (template_idx != len(temps_filtered))
         
         logging.info(f'Template coverage: {found / len(tasks) * 100:.2f}%')
         labels = np.array(labels)
@@ -295,7 +297,7 @@ if __name__ == '__main__':
     if not (args.data_folder / args.templates_file).exists():
         # ~40 sec on 40k train rxn_smi on 16 cores
         get_train_templates(args)
-    if True: # not (args.data_folder / f"{args.output_file_prefix}_csv_train.csv").exists():
+    if not (args.data_folder / f"{args.output_file_prefix}_csv_train.csv").exists():
         # ~3 min on 40k train rxn_smi on 16 cores
         match_templates(args)
     
