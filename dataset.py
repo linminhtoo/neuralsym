@@ -7,6 +7,8 @@ from torch.utils.data import Dataset
 from typing import List, Optional, Tuple, Union
 from scipy import sparse
 
+Tensor = torch.tensor
+
 class FingerprintDataset(Dataset):
     """
     Dataset class for fingerprint representation of products for template relevance prediction
@@ -18,7 +20,7 @@ class FingerprintDataset(Dataset):
         root: Optional[str] = None,
     ):
         if root is None:
-            root = Path(__file__).resolve().parents[1] / "data" / "cleaned_data"
+            root = Path(__file__).resolve().parent / 'data'
         else:
             root = Path(root)
         if (root / prodfps_filename).exists():
@@ -53,7 +55,7 @@ class FingerprintDataset(Dataset):
         labels = torch.as_tensor(
             self.labels[idx]
         )
-        return prod_fps.float(), labels.float(), idx
+        return prod_fps.float(), labels.long(), idx
 
     def __len__(self):
         return self.data.shape[0]

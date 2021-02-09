@@ -1,14 +1,18 @@
 import csv
 import sys
 import logging
+import time
 import argparse
 import os
 import numpy as np
 import rdkit
-
+import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import pandas as pd
+from rdchiral.main import rdchiralReaction, rdchiralReactants, rdchiralRun
+
 from torch.utils.data import DataLoader
 from datetime import datetime
 from pathlib import Path
@@ -20,74 +24,230 @@ from rdkit import RDLogger
 from model import TemplateNN
 from dataset import FingerprintDataset
 
+DATA_FOLDER = Path(__file__).resolve().parent / 'data'
+CHECKPOINT_FOLDER = Path(__file__).resolve().parent / 'checkpoint'
+
 def train(args):
-    # TODO: add GPU support, add test, display statistics
-    # TODO: add early stopping
-    # TODO: add checkpointing & resuming from checkpoint
+    # TODO: display statistics
+    # TODO: resuming from checkpoint
     logging.info(f'Loading templates from file: {args.templates_file}')
-    with open(args.data_folder / args.templates_file, 'r') as f:
+    with open(DATA_FOLDER / args.templates_file, 'r') as f:
         templates = f.readlines()
-    template_cnt = 0
+    templates_filtered = []
     for p in templates:
         pa, cnt = p.strip().split(': ')
         if int(cnt) >= args.min_freq:
-            template_cnt += 1
-    logging.info(f'Total number of template patterns: {template_cnt}')
+            templates_filtered.append(pa)
+    logging.info(f'Total number of template patterns: {len(templates_filtered)}')
 
     model = TemplateNN(
-        output_size=template_cnt+1, # to allow predicting None template
+        output_size=len(templates_filtered)+1, # to allow predicting None template
         size=args.hidden_size,
         num_layers_body=args.depth,
         input_size=args.fp_size
     )
-    criterion = nn.CrossEntropyLoss() # should set reduction = 'sum' & then divide loss at end of epoch
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss(reduction='sum') # should set reduction = 'sum' & then divide loss at end of epoch
+    optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
 
     train_dataset = FingerprintDataset(
                             args.prodfps_prefix+'_train.npz', 
-                            args.labels_prefix+'_train.csv'
+                            args.labels_prefix+'_train.npy'
                         )
+    train_size = len(train_dataset)
     train_loader = DataLoader(train_dataset, batch_size=args.bs, shuffle=True)
 
     valid_dataset = FingerprintDataset(
                             args.prodfps_prefix+'_valid.npz', 
-                            args.labels_prefix+'_valid.csv'
+                            args.labels_prefix+'_valid.npy'
                         )
+    valid_size = len(valid_dataset)
     valid_loader = DataLoader(valid_dataset, batch_size=args.bs_eval, shuffle=False)
-    
-    for epoch in range(args.epochs):
-        running_loss = 0.
-        for i, data in tqdm(enumerate(train_loader)):
-            inputs, labels, idxs = data
+    del train_dataset, valid_dataset
 
+    proposals_data_valid = pd.read_csv(
+        DATA_FOLDER / f"{args.csv_prefix}_valid.csv", 
+        index_col=None, dtype='str'
+    )
+    
+    train_losses, valid_losses = [], []
+    train_accs, valid_accs = [], []    
+    max_valid_acc = float('-inf')
+    wait = 0 # early stopping patience counter
+    start = time.time()
+    for epoch in range(args.epochs):
+        train_loss, train_correct, train_seen = 0, 0, 0
+        train_loader = tqdm(train_loader, desc='training')
+        model.train()
+        for data in train_loader:
+            inputs, labels, idxs = data
+            inputs, labels = inputs.to(device), labels.to(device)
+
+            model.zero_grad()
             optimizer.zero_grad()
             outputs = model(inputs)
+            # print(outputs.shape, labels.shape, inputs.shape)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
 
-            # print statistics
-            running_loss += loss.item()
-            if i % 2000 == 1999:    # print every 2000 mini-batches
-                print('[%d, %5d] loss: %.3f' %
-                    (epoch + 1, i + 1, running_loss / 2000))
-                running_loss = 0.
+            train_loss += loss.item()
+            train_seen += labels.shape[0]
+            batch_preds = nn.Softmax(dim=1)(outputs)
+            # print(train_preds.shape)
+            # print(torch.eq(
+            #         torch.topk(batch_preds, k=1)[1], labels
+            #     ))
+            train_correct += torch.sum(
+                torch.eq(
+                    torch.topk(batch_preds, k=1)[1], labels
+                )
+            ).item()
+            train_loader.set_description(f"training: loss={train_loss/train_seen:.4f}, acc={train_correct/train_seen:.4f}")
+            train_loader.refresh()
+        train_losses.append(train_loss/train_seen)
+        train_accs.append(train_correct/train_seen)
 
-    logging.info('Finished Training')
+        model.eval()
+        with torch.no_grad():
+            valid_loss, valid_correct, valid_seen = 0, 0, 0
+            valid_loader = tqdm(valid_loader, desc='validating')
+            for data in valid_loader:
+                inputs, labels, idxs = data
+                inputs, labels = inputs.to(device), labels.to(device)
+
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+
+                valid_loss += loss.item()
+                valid_seen += labels.shape[0]
+                batch_preds = nn.Softmax(dim=-1)(outputs) # need to retain top-K accuracy
+                valid_correct += torch.sum(
+                            torch.eq(
+                                torch.topk(batch_preds, k=1)[1], labels
+                            )
+                        ).item()
+
+                valid_loader.set_description(f"validating: loss={valid_loss/valid_seen:.4f}, acc={valid_correct/valid_seen:.4f}")
+                valid_loader.refresh()
+
+                # TODO: display some examples + model predictions/labels for monitoring model generalization
+                try:
+                    for j in range(i * args.bs_eval, (i+1) * args.bs_eval):
+                        # peek at a random sample of current batch to monitor training progress
+                        if j % (valid_size // 5) == random.randint(0, 3) or j % (valid_size // 8) == random.randint(0, 4): 
+                            rxn_idx = random.sample(list(range(args.bs_eval)), k=1)[0]
+                            rxn_true_class = labels[rxn_idx]
+                            rxn_pred_class = batch_preds[rxn_idx, 0].item()
+                            rxn_pred_score = outputs[rxn_idx, rxn_pred_class].item()
+                            rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+
+                            # load template database
+                            rxn_pred_temp = templates_filtered[rxn_pred_class]
+                            rxn_true_temp = proposals_data_valid[idxs[rxn_idx], 4]
+                            rxn_true_prod = proposals_data_valid[idxs[rxn_idx], 1]
+                            rxn_true_prec = proposals_data_valid[idxs[rxn_idx], 2]
+
+                            # apply template to get predicted precursor
+                            rxn = rdchiralReaction(rxn_pred_temp[-1] + '>>' + rxn_pred_temp[0]) # reverse template
+                            prod = rdchiralReactants(rxn_true_prod)
+                            rxn_pred_prec = rdchiralRun(rxn, prod)
+
+                            logging.info(f'\ncurr product:                          \t\t\t\t{rxn_true_prod}')
+                            if rxn_pred_class == len(templates_filtered):
+                                logging.info(f'pred precursor (score = {rxn_pred_score:+.4f}):\t\t\tNo template')
+                            else:
+                                logging.info(f'pred precursor (score = {rxn_pred_score:+.4f}):\t\t\t{rxn_pred_prec}')
+                            logging.info(f'true precursor (score = {rxn_true_score:+.4f}):\t\t\t{rxn_true_prec}')
+                            break
+                except Exception as e: # do nothing # https://stackoverflow.com/questions/11414894/extract-traceback-info-from-an-exception-object/14564261#14564261
+                    tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
+                    logging.info("".join(tb_str))
+                    logging.info('\nIndex out of range (last minibatch)')
+
+        valid_losses.append(valid_loss/valid_seen)
+        valid_accs.append(valid_correct/valid_seen)
+
+        if args.checkpoint and valid_accs[-1] > max_valid_acc:
+            # checkpoint model
+            model_state_dict = model.state_dict()
+            checkpoint_dict = {
+                "epoch": epoch,
+                "state_dict": model_state_dict, "optimizer": optimizer.state_dict(),
+                "train_accs": train_accs, "train_losses": train_losses,
+                "valid_accs": valid_accs, "valid_losses": valid_losses,
+                "max_valid_acc": max_valid_acc
+            }
+            checkpoint_filename = (
+                CHECKPOINT_FOLDER
+                / f"{args.expt_name}_{epoch:04d}.pth.tar"
+            )
+            torch.save(checkpoint_dict, checkpoint_filename)
+
+        if args.early_stop and max_valid_acc - valid_accs[-1] > args.early_stop_min_delta:
+            if args.early_stop_patience <= wait:
+                message = f"\nEarly stopped at the end of epoch: {epoch}, \
+                \ntrain loss: {train_losses[-1]:.4f}, train acc: {train_accs[-1]:.4f}, \
+                \nvalid loss: {valid_losses[-1]:.4f}, valid acc: {valid_accs[-1]:.4f} \
+                \n"
+                logging.info(message)
+                break
+            else:
+                wait += 1
+                logging.info(
+                    f'\nIncrease in valid acc < early stop min delta {args.early_stop_min_delta}, \
+                    \npatience count: {wait} \
+                    \n'
+                )
+        else:
+            wait = 0
+            max_valid_acc = max(max_valid_acc, valid_accs[-1])
+
+        message = f"\nEnd of epoch: {epoch}, \
+            \ntrain loss: {train_losses[-1]:.4f}, train acc: {train_accs[-1]:.4f}, \
+            \nvalid loss: {valid_losses[-1]:.4f}, valid acc: {valid_accs[-1]:.4f} \
+            \n"
+        logging.info(message)
+
+    logging.info(f'Finished training, total time (minutes): {(time.time() - start) / 60}')
     return model
 
 def test(model, args):
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    
     test_dataset = FingerprintDataset(
                             args.prodfps_prefix+'_test.npz', 
-                            args.labels_prefix+'_test.csv'
+                            args.labels_prefix+'_test.npy'
                         )
     test_loader = DataLoader(test_dataset, batch_size=args.bs_eval, shuffle=False)
 
+    proposals_data_test = pd.read_csv(
+        DATA_FOLDER / f"{args.csv_prefix}_test.csv", 
+        index_col=None, dtype='str'
+    )
+
+    model.eval()
     with torch.no_grad():
-        for i, data in tqdm(enumerate(test_loader)):
+        test_loss, test_correct, test_seen = 0, 0, 0
+        test_loader = tqdm(test_loader, desc='testing')
+        for data in test_loader:
             inputs, labels, idxs = data
+            inputs, labels = inputs.to(device), labels.to(device)
 
             outputs = model(inputs)
+            loss = criterion(outputs, labels)
+
+            test_loss += loss.item()
+            test_seen += labels.shape[0]
+            batch_preds = nn.Softmax(dim=-1)(outputs) # need to store top-K
+            test_correct += torch.eq(batch_preds, labels)
+
+            test_loader.set_description(f"testing: loss={test_loss/test_seen:.4f}, acc={test_correct/test_seen:.4f}")
+            test_loader.refresh()
+
+            # TODO: display some examples + model predictions/labels for monitoring model generalization
 
     logging.info('Finished Testing')
 
@@ -95,20 +255,22 @@ def parse_args():
     parser = argparse.ArgumentParser("train.py")
     # mode & metadata
     parser.add_argument("--expt_name", help="experiment name", type=str, default="")
-    # parser.add_argument("--date_trained", help="date trained (DD_MM_YYYY)", 
-    #                     type=str, default=date.today().strftime("%d_%m_%Y"))
+    parser.add_argument("--do_train", help="whether to train", action="store_true")
+    parser.add_argument("--do_test", help="whether to test", action="store_true")
     # file names
     parser.add_argument("--log_file", help="log_file", type=str, default="train")
-    parser.add_argument("--prodfps_file_prefix",
+    parser.add_argument("--templates_file", help="templates_file", type=str, default="50k_training_templates")
+    parser.add_argument("--prodfps_prefix",
                         help="npz file of product fingerprints",
                         type=str)
-    parser.add_argument("--labels_file_prefix",
+    parser.add_argument("--labels_prefix",
                         help="npy file of labels",
                         type=str)
-    parser.add_argument("--csv_file_prefix",
+    parser.add_argument("--csv_prefix",
                         help="csv file of various metadata about the rxn",
                         type=str)
     parser.add_argument("--radius", help="Fingerprint radius", type=int, default=2)
+    parser.add_argument("--min_freq", help="Min freq of template", type=int, default=1)
     parser.add_argument("--fp_size", help="Fingerprint size", type=int, default=32681)
     # parser.add_argument("--fp_type", help='Fingerprint type ["count", "bit"]', type=str, default="count")
     # training params
@@ -116,12 +278,9 @@ def parse_args():
     parser.add_argument("--random_seed", help="random seed", type=int, default=0)
     parser.add_argument("--bs", help="batch size", type=int, default=128)
     parser.add_argument("--bs_eval", help="batch size (valid/test)", type=int, default=256)
-    parser.add_argument("--learning_rate", help="learning rate", type=float, default=5e-3)
+    parser.add_argument("--learning_rate", help="learning rate", type=float, default=1e-3)
     parser.add_argument("--epochs", help="num. of epochs", type=int, default=30)
     parser.add_argument("--early_stop", help="whether to use early stopping", action="store_true") # type=bool, default=True) 
-    parser.add_argument("--early_stop_criteria",
-                        help="criteria for early stopping ['loss', 'acc', top1_acc', 'top5_acc', 'top10_acc', 'top50_acc']",
-                        type=str, default='top1_acc')
     parser.add_argument("--early_stop_patience",
                         help="num. of epochs tolerated without improvement in criteria before early stop",
                         type=int, default=2)
@@ -148,17 +307,17 @@ if __name__ == '__main__':
     logger.addHandler(fh)
     logger.addHandler(sh)
 
-    if args.data_folder is None:
-        args.data_folder = Path(__file__).resolve().parents[0] / 'data'
+    if args.labels_prefix is None:
+        args.labels_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_labels'
+    if args.prodfps_prefix is None:
+        args.prodfps_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_prod_fps'
+    if args.csv_prefix is None:
+        args.csv_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_csv'
+
+    if args.do_train:
+        model = train(args)
     else:
-        args.data_folder = Path(args.data_folder)
-
-    if args.labels_file_prefix is None:
-        args.labels_file_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_labels'
-    if args.prodfps_file_prefix is None:
-        args.prodfps_file_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_prod_fps'
-    if args.csv_file_prefix is None:
-        args.csv_file_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_csv'
-
-    model = train(args)
-    test(model, args)
+        # load model from saved checkpoint
+        pass
+    if args.do_test:
+        test(model, args)

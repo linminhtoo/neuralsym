@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -51,7 +52,7 @@ class Highway(nn.Module):
             and ⨀ is element-wise multiplication
             """
         for layer in range(self.num_layers):
-            gate = F.sigmoid(self.gate[layer](x))
+            gate = torch.sigmoid(self.gate[layer](x))
 
             nonlinear = self.f(self.nonlinear[layer](x))
             linear = self.linear[layer](x)
@@ -64,10 +65,10 @@ class Highway(nn.Module):
 class TemplateNN(nn.Module):
     def __init__(self, output_size, size=512, num_layers_body=5, 
                 dropout_head=0.3, dropout_body=0.1,
-                f=nn.ELU, input_size=32681):
+                f=F.elu, input_size=32681):
         super(TemplateNN, self).__init__()
         self.highway_head = Highway(
-                num_layers=1, f=f, dropout=dropout_head, 
+                size=size, num_layers=1, f=f, dropout=dropout_head, 
                 head=True, input_size=input_size
             )
         self.highway_body = Highway(
@@ -79,4 +80,4 @@ class TemplateNN(nn.Module):
 
     def forward(self, fp):
         embedding = self.highway_body(self.highway_head(fp))
-        return self.classifier(embedding)
+        return self.classifier(embedding).squeeze(dim=1)
