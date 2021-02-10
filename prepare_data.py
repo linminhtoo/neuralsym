@@ -20,6 +20,7 @@ from rdkit import RDLogger
 from rdkit import Chem, DataStructs
 from rdkit.Chem.rdFingerprintGenerator import GetMorganGenerator
 
+from rdchiral.main import rdchiralReaction, rdchiralReactants, rdchiralRun
 from rdchiral.template_extractor import extract_from_reaction
 
 sparse_fp = scipy.sparse.csr_matrix
@@ -70,6 +71,47 @@ def gen_prod_fps(args):
         with open(args.data_folder / f"{args.output_file_prefix}_prod_smis_nomap_{phase}.smi", 'wb') as f:
             pickle.dump(phase_prod_smi_nomap, f, protocol=4)
 
+def variance_cutoff(args):
+    for phase in ['train', 'valid', 'test']:
+        prod_fps = sparse.load_npz(args.data_folder / f"{args.output_file_prefix}_prod_fps_{phase}.npz")
+
+        # take log(x+1), ~18 min for 1mil-dim on 8 cores (no parallelization)
+        def log_one_fp(prod_fp_sparse_row):
+            return sparse.csr_matrix(np.log(prod_fp_sparse_row.toarray() + 1))
+
+        logged = []
+        for row_idx in tqdm(range(prod_fps.shape[0]), desc='Taking log(x+1)'):
+            logged.append(
+                sparse.csr_matrix(np.log(prod_fps[row_idx].toarray() + 1)) # immediately convert back to csr to save memory
+            )
+        logged = sparse.vstack(logged)
+
+        # collect variance statistics by column index from training product fingerprints
+        if phase == 'train':
+            indices = defaultdict(lambda: [])
+            for row_idx in tqdm(range(logged.shape[0]), desc='Collecting fingerprint values by indices'):
+                for col_idx in range(logged.shape[1]):
+                    indices[col_idx].append(logged[row_idx, col_idx])
+
+            vars = []
+            for idx in indices:
+                vars.append(np.var(indices[idx]))
+
+            indices_ordered = list(range(args.fp_size)) # should be 1,000,000
+            indices_ordered.sort(key=lambda x: vars[x], reverse=True)
+
+        # build and save final thresholded fingerprints
+        thresholded = []
+        for row_idx in tqdm(range(logged.shape[0]), desc='Building thresholded fingerprints'):
+            thresholded.append(
+                logged[row_idx, indices_ordered[:args.final_fp_size]] # should be 32,681
+            )
+        thresholded = sparse.vstack(thresholded)
+        sparse.save_npz(
+            args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_prod_fps_{phase}.npz",
+            thresholded
+        )
+
 def get_tpl(task):
     idx, react, prod = task
     reaction = {'_id': idx, 'reactants': react, 'products': prod}
@@ -110,22 +152,31 @@ def get_train_templates(args):
     num_cores = len(os.sched_getaffinity(0))
     logging.info(f'Parallelizing over {num_cores} cores')
     pool = multiprocessing.Pool(num_cores)
+    invalid_temp = 0
     for result in tqdm(pool.imap_unordered(get_tpl, rxns),
                         total=len(rxns)):
         idx, template = result
         if 'reaction_smarts' not in template:
+            invalid_temp += 1
             continue # no template could be extracted
-
-        # canonicalize template
+        # template = template['reaction_smarts']
+        ###############################################################
+        # canonicalize template (needed, bcos q a number of templates are duplicates I think, 10247 --> 10150)
         p_temp = cano_smarts(template['products']) # reaction_smarts
         r_temp = cano_smarts(template['reactants'])
         cano_temp = r_temp + '>>' + p_temp
-        # cano_temp = cano_smarts(template['reaction_smarts'])
 
         if cano_temp not in templates:
             templates[cano_temp] = 1
         else:
             templates[cano_temp] += 1
+        ###############################################################
+        # if template not in templates:
+        #     templates[template] = 1
+        # else:
+        #     templates[template] += 1
+
+    logging.info(f'No of rxn where template extraction failed: {invalid_temp}')
 
     templates = sorted(templates.items(), key=lambda x: x[1], reverse=True)
     templates = ['{}: {}\n'.format(p[0], p[1]) for p in templates]
@@ -137,23 +188,50 @@ def get_template_idx(temps_filtered, task):
     rxn_idx, rxn_smi = task
     r = rxn_smi.split('>>')[0]
     p = rxn_smi.split('>>')[-1]
+    
+    # apply each template in database to product, & see if we recover ground truth
+    # DOESNT WORK, cannot recover ground truth precursors at all even for training set
+    # prod = rdchiralReactants(p)
+    # for temp_idx, pattern in enumerate(temps_filtered):
+    #     # reverse template
+    #     rxn = rdchiralReaction(
+    #         pattern.split('>>')[-1] + '>>' + \
+    #         pattern.split('>>')[0]
+    #     )
+    #     try:
+    #         pred_prec = rdchiralRun(rxn, prod)
+    #     except:
+    #         continue
+    #     # canonicalize precursor
+    #     pred_prec = '.'.join(pred_prec)
+    #     try:
+    #         pred_prec = Chem.MolToSmiles(Chem.MolFromSmiles(pred_prec))
+    #     except Exception as e:
+    #         # print(e)
+    #         continue
+    #     if pred_prec == r:
+    #         # logging.info(f'Found {temp_idx}')
+    #         return rxn_idx, temp_idx # template_idx = label
+    
+    ############################################################
+    # original label generation pipeline
     rxn = (rxn_idx, r, p)
     rxn_idx, rxn_template = get_tpl(rxn)
+
     if 'reaction_smarts' not in rxn_template:
         return rxn_idx, -1 # unable to extract template
     p_temp = cano_smarts(rxn_template['products'])
     r_temp = cano_smarts(rxn_template['reactants'])
     cano_temp = r_temp + '>>' + p_temp
 
-    # rxn_mol = Chem.MolFromSmiles(rxn_smi)
-    # [a.SetAtomMapNum(0) for a in rxn_mol.GetAtoms()]
-
     for temp_idx, extr_temp in enumerate(temps_filtered):
         if extr_temp == cano_temp:
             return rxn_idx, temp_idx # template_idx = label
-
-    # for temp_idx, pattern in enumerate(temps_filtered):
-    #     pattern_mol = Chem.MolFromSmarts(pattern)
+    ############################################################
+    
+    ############################################################
+    # original code from RetroXpert
+        # pattern_mol = Chem.MolFromSmarts(pattern)
     #     if pattern_mol is None:
     #         logging.info('error: pattern_mol is None')
     #     try:
@@ -167,6 +245,7 @@ def get_template_idx(temps_filtered, task):
     #         if len(matches) > 0:
     #             return rxn_idx, temp_idx # template_idx = label
     # logging.info(rxn_smi)
+    ############################################################
     return rxn_idx, len(temps_filtered) # no template matching
 
 def match_templates(args):
@@ -223,6 +302,10 @@ def match_templates(args):
             ])
             labels.append(template_idx)
             found += (template_idx != len(temps_filtered))
+
+            if phase == 'train' and template_idx == len(temps_filtered):
+                # should be 0 for USPTO-50K
+                logging.info(f'At {rxn_idx} of train, could not recall template for some reason')
         
         logging.info(f'Template coverage: {found / len(tasks) * 100:.2f}%')
         labels = np.array(labels)
@@ -261,7 +344,8 @@ def parse_args():
     
     parser.add_argument("--min_freq", help="Minimum frequency of template in training data to be retained", type=int, default=1)
     parser.add_argument("--radius", help="Fingerprint radius", type=int, default=2)
-    parser.add_argument("--fp_size", help="Fingerprint size", type=int, default=32681)
+    parser.add_argument("--fp_size", help="Fingerprint size", type=int, default=1000000)
+    parser.add_argument("--final_fp_size", help="Fingerprint size", type=int, default=32681)
     # parser.add_argument("--fp_type", help='Fingerprint type ["count", "bit"]', type=str, default="count")
     return parser.parse_args()
 
@@ -292,13 +376,19 @@ if __name__ == '__main__':
     logging.info(args)
 
     if not (args.data_folder / f"{args.output_file_prefix}_prod_fps_valid.npz").exists():
-        # ~2 min on 40k train prod_smi on 16 cores
+        # ~2 min on 40k train prod_smi on 16 cores for 32681-dim (but no parallelization code)
+        # ~30 min on 40k train prod_smi on 8 cores for 1 mil-dim (but no parallelization code)
         gen_prod_fps(args)
-    if not (args.data_folder / args.templates_file).exists():
-        # ~40 sec on 40k train rxn_smi on 16 cores
-        get_train_templates(args)
-    if not (args.data_folder / f"{args.output_file_prefix}_csv_train.csv").exists():
-        # ~3 min on 40k train rxn_smi on 16 cores
-        match_templates(args)
+    if not (args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_prod_fps_valid.npz").exists():
+        variance_cutoff(args)
+
+    args.output_file_prefix = f'{args.output_file_prefix}_to_{args.final_fp_size}'
+    
+    # if not (args.data_folder / args.templates_file).exists():
+    #     # ~40 sec on 40k train rxn_smi on 16 cores
+    #     get_train_templates(args)
+    # if not (args.data_folder / f"{args.output_file_prefix}_csv_train.csv").exists():
+    #     # ~3 min on 40k train rxn_smi on 16 cores
+    #     match_templates(args)
     
     logging.info('Done!')

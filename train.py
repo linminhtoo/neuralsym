@@ -53,7 +53,7 @@ def train(args):
     logging.info(f'Total number of template patterns: {len(templates_filtered)}')
 
     model = TemplateNN(
-        output_size=len(templates_filtered)+1, # to allow predicting None template, whose idx == len(templates_filtered)
+        output_size=len(templates_filtered)+1, # TODO: this should just be len(templates_filtered) and then do masking at valid/test time
         size=args.hidden_size,
         num_layers_body=args.depth,
         input_size=args.fp_size
@@ -264,7 +264,7 @@ def test(model, args):
     with torch.no_grad():
         test_loss, test_correct, test_seen = 0, 0, 0
         test_loader = tqdm(test_loader, desc='testing')
-        for data in test_loader:
+        for i, data in enumerate(test_loader):
             inputs, labels, idxs = data
             inputs, labels = inputs.to(device), labels.to(device)
 
@@ -327,8 +327,7 @@ def test(model, args):
                 logging.info('\nIndex out of range (last minibatch)')
 
     message = f" \
-    \ttest loss: {test_loss/test_seen:.4f}, test top-1 acc: {test_correct/test_seen:.4f} \
-    \n"
+    \ntest loss: {test_loss/test_seen:.4f}, test top-1 acc: {test_correct/test_seen:.4f}"
     logging.info(message)
     logging.info('Finished Testing')
 
