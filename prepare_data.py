@@ -100,7 +100,6 @@ def variance_cutoff(args):
     for phase in ['train', 'valid', 'test']:
         prod_fps = sparse.load_npz(args.data_folder / f"{args.output_file_prefix}_prod_fps_{phase}.npz")
 
-        # take log(x+1), ~2.5 min for 1mil-dim on 8 cores (parallelized)
         rows = []
         for row_idx in tqdm(range(prod_fps.shape[0])):
             rows.append(prod_fps[row_idx])
@@ -110,7 +109,8 @@ def variance_cutoff(args):
         pool = multiprocessing.Pool(num_cores)
 
         logged = []
-        # imap is much, much faster than map 
+        # imap is much, much faster than map
+        # take log(x+1), ~2.5 min for 1mil-dim on 8 cores (parallelized)
         for result in tqdm(pool.imap(log_row, rows),
                        total=len(rows), desc='Taking log(x+1)'):
             logged.append(result)
@@ -118,20 +118,24 @@ def variance_cutoff(args):
 
         # collect variance statistics by column index from training product fingerprints
         # currently VERY slow with 2 for-loops to access each element individually.
-        # idea: tranpose the sparse matrix, then go through 1 million rows using pool.imap
+        # idea: tranpose the sparse matrix, then go through 1 million rows using pool.imap 
+        # massive speed up from 280 hours to 1 hour on 8 cores, i guess now I just have to use more cores to speed it up even more
+        logged = logged.transpose()     # [39713, 1 mil] -> [1 mil, 39713]
         if phase == 'train':
-            indices = defaultdict(lambda: [])
-            for row_idx in tqdm(range(logged.shape[0]), desc='Collecting fingerprint values by indices'):
-                for col_idx in range(logged.shape[1]):
-                    indices[col_idx].append(logged[row_idx, col_idx])
-
+            # no need to store all the values from each col_idx (results in OOM). just calc variance immediately, and move on
+            # indices = defaultdict(lambda: [])
             vars = []
-            for idx in indices:
-                vars.append(np.var(indices[idx]))
+            for col_idx in tqdm(range(logged.shape[0]), desc='Collecting fingerprint values by indices'):
+                # indices[col_idx].append(logged[col_idx].toarray())
+                vars.append(np.var(logged[col_idx].toarray()))
+            # for row_idx in tqdm(range(logged.shape[0]), desc='Collecting fingerprint values by indices'):
+            #     for col_idx in range(logged.shape[1]):
+            #         indices[col_idx].append(logged[row_idx, col_idx])
 
-            indices_ordered = list(range(args.fp_size)) # should be 1,000,000
+            indices_ordered = list(range(logged.shape[0])) # should be 1,000,000
             indices_ordered.sort(key=lambda x: vars[x], reverse=True)
 
+        logged = logged.transpose() # [1 mil, 39713] -> [39713, 1 mil]
         # build and save final thresholded fingerprints
         thresholded = []
         for row_idx in tqdm(range(logged.shape[0]), desc='Building thresholded fingerprints'):
@@ -418,11 +422,11 @@ if __name__ == '__main__':
 
     args.output_file_prefix = f'{args.output_file_prefix}_to_{args.final_fp_size}'
     
-    # if not (args.data_folder / args.templates_file).exists():
-    #     # ~40 sec on 40k train rxn_smi on 16 cores
-    #     get_train_templates(args)
-    # if not (args.data_folder / f"{args.output_file_prefix}_csv_train.csv").exists():
-    #     # ~3 min on 40k train rxn_smi on 16 cores
-    #     match_templates(args)
+    if not (args.data_folder / args.templates_file).exists():
+        # ~40 sec on 40k train rxn_smi on 16 cores
+        get_train_templates(args)
+    if not (args.data_folder / f"{args.output_file_prefix}_csv_train.csv").exists():
+        # ~3 min on 40k train rxn_smi on 16 cores
+        match_templates(args)
     
     logging.info('Done!')
