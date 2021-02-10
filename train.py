@@ -61,7 +61,7 @@ def train(args):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
-    criterion = nn.CrossEntropyLoss(reduction='sum') # should set reduction = 'sum' & then divide loss at end of epoch
+    criterion = nn.CrossEntropyLoss(reduction='sum')
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
 
     train_dataset = FingerprintDataset(
@@ -158,7 +158,10 @@ def train(args):
                             # load template database
                             rxn_pred_temp = templates_filtered[rxn_pred_class]
                             rxn_true_temp_idx = int(proposals_data_valid.iloc[idxs[rxn_idx].item(), 4])
-                            rxn_true_temp = templates_filtered[rxn_true_temp_idx]
+                            if rxn_true_temp_idx < len(templates_filtered):
+                                rxn_true_temp = templates_filtered[rxn_true_temp_idx]
+                            else:
+                                rxn_true_temp = 'Template not in training data'
                             rxn_true_prod = proposals_data_valid.iloc[idxs[rxn_idx].item(), 1]
                             rxn_true_prec = proposals_data_valid.iloc[idxs[rxn_idx].item(), 2]
 
@@ -233,6 +236,17 @@ def train(args):
 def test(model, args):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
+    logging.info(f'Loading templates from file: {args.templates_file}')
+    with open(DATA_FOLDER / args.templates_file, 'r') as f:
+        templates = f.readlines()
+    templates_filtered = []
+    for p in templates:
+        pa, cnt = p.strip().split(': ')
+        if int(cnt) >= args.min_freq:
+            templates_filtered.append(pa)
+    logging.info(f'Total number of template patterns: {len(templates_filtered)}')
+
+    criterion = nn.CrossEntropyLoss(reduction='sum')
     test_dataset = FingerprintDataset(
                             args.prodfps_prefix+'_test.npz', 
                             args.labels_prefix+'_test.npy'
@@ -284,7 +298,10 @@ def test(model, args):
                         # load template database
                         rxn_pred_temp = templates_filtered[rxn_pred_class]
                         rxn_true_temp_idx = int(proposals_data_test.iloc[idxs[rxn_idx].item(), 4])
-                        rxn_true_temp = templates_filtered[rxn_true_temp_idx]
+                        if rxn_true_temp_idx < len(templates_filtered):
+                            rxn_true_temp = templates_filtered[rxn_true_temp_idx]
+                        else:
+                            rxn_true_temp = 'Template not in training data'
                         rxn_true_prod = proposals_data_test.iloc[idxs[rxn_idx].item(), 1]
                         rxn_true_prec = proposals_data_test.iloc[idxs[rxn_idx].item(), 2]
 
@@ -382,6 +399,6 @@ if __name__ == '__main__':
         model = train(args)
     else:
         # load model from saved checkpoint
-        pass
+        raise NotImplementedError
     if args.do_test:
         test(model, args)
