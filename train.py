@@ -2,6 +2,7 @@ import csv
 import sys
 import logging
 import time
+import traceback
 import argparse
 import os
 import numpy as np
@@ -27,9 +28,20 @@ from dataset import FingerprintDataset
 DATA_FOLDER = Path(__file__).resolve().parent / 'data'
 CHECKPOINT_FOLDER = Path(__file__).resolve().parent / 'checkpoint'
 
+def seed_everything(seed: Optional[int] = 0) -> None:
+    torch.manual_seed(seed)
+    random.seed(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    np.random.seed(seed)
+
+    logging.info(f"Using seed: {seed}\n")
+
 def train(args):
-    # TODO: display statistics
+    # TODO: add in top-K accuracy
     # TODO: resuming from checkpoint
+    # TODO: ReduceLROnPlateau
+    seed_everything(args.random_seed)
+
     logging.info(f'Loading templates from file: {args.templates_file}')
     with open(DATA_FOLDER / args.templates_file, 'r') as f:
         templates = f.readlines()
@@ -41,7 +53,7 @@ def train(args):
     logging.info(f'Total number of template patterns: {len(templates_filtered)}')
 
     model = TemplateNN(
-        output_size=len(templates_filtered)+1, # to allow predicting None template
+        output_size=len(templates_filtered)+1, # to allow predicting None template, whose idx == len(templates_filtered)
         size=args.hidden_size,
         num_layers_body=args.depth,
         input_size=args.fp_size
@@ -81,7 +93,7 @@ def train(args):
         train_loss, train_correct, train_seen = 0, 0, 0
         train_loader = tqdm(train_loader, desc='training')
         model.train()
-        for data in train_loader:
+        for i, data in enumerate(train_loader):
             inputs, labels, idxs = data
             inputs, labels = inputs.to(device), labels.to(device)
 
@@ -95,15 +107,13 @@ def train(args):
 
             train_loss += loss.item()
             train_seen += labels.shape[0]
-            batch_preds = nn.Softmax(dim=1)(outputs)
-            # print(train_preds.shape)
-            # print(torch.eq(
-            #         torch.topk(batch_preds, k=1)[1], labels
-            #     ))
+            outputs = nn.Softmax(dim=1)(outputs)
+            batch_preds = torch.topk(outputs, k=1)[1].squeeze(dim=-1)
+            # print(batch_preds.shape, labels.shape)
             train_correct += torch.sum(
                 torch.eq(
-                    torch.topk(batch_preds, k=1)[1], labels
-                )
+                    batch_preds, labels
+                ), dim=0
             ).item()
             train_loader.set_description(f"training: loss={train_loss/train_seen:.4f}, acc={train_correct/train_seen:.4f}")
             train_loader.refresh()
@@ -114,7 +124,7 @@ def train(args):
         with torch.no_grad():
             valid_loss, valid_correct, valid_seen = 0, 0, 0
             valid_loader = tqdm(valid_loader, desc='validating')
-            for data in valid_loader:
+            for i, data in enumerate(valid_loader):
                 inputs, labels, idxs = data
                 inputs, labels = inputs.to(device), labels.to(device)
 
@@ -123,44 +133,50 @@ def train(args):
 
                 valid_loss += loss.item()
                 valid_seen += labels.shape[0]
-                batch_preds = nn.Softmax(dim=-1)(outputs) # need to retain top-K accuracy
+                outputs = nn.Softmax(dim=-1)(outputs) 
+                batch_preds = torch.topk(outputs, k=1)[1].squeeze(dim=-1) # TODO: include top-K accuracy
                 valid_correct += torch.sum(
                             torch.eq(
-                                torch.topk(batch_preds, k=1)[1], labels
-                            )
+                                batch_preds, labels
+                            ), dim=0
                         ).item()
 
                 valid_loader.set_description(f"validating: loss={valid_loss/valid_seen:.4f}, acc={valid_correct/valid_seen:.4f}")
                 valid_loader.refresh()
 
-                # TODO: display some examples + model predictions/labels for monitoring model generalization
+                # display some examples + model predictions/labels for monitoring model generalization
                 try:
                     for j in range(i * args.bs_eval, (i+1) * args.bs_eval):
                         # peek at a random sample of current batch to monitor training progress
                         if j % (valid_size // 5) == random.randint(0, 3) or j % (valid_size // 8) == random.randint(0, 4): 
                             rxn_idx = random.sample(list(range(args.bs_eval)), k=1)[0]
                             rxn_true_class = labels[rxn_idx]
-                            rxn_pred_class = batch_preds[rxn_idx, 0].item()
+                            rxn_pred_class = int(batch_preds[rxn_idx].item())
                             rxn_pred_score = outputs[rxn_idx, rxn_pred_class].item()
                             rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
 
                             # load template database
                             rxn_pred_temp = templates_filtered[rxn_pred_class]
-                            rxn_true_temp = proposals_data_valid[idxs[rxn_idx], 4]
-                            rxn_true_prod = proposals_data_valid[idxs[rxn_idx], 1]
-                            rxn_true_prec = proposals_data_valid[idxs[rxn_idx], 2]
+                            rxn_true_temp_idx = int(proposals_data_valid.iloc[idxs[rxn_idx].item(), 4])
+                            rxn_true_temp = templates_filtered[rxn_true_temp_idx]
+                            rxn_true_prod = proposals_data_valid.iloc[idxs[rxn_idx].item(), 1]
+                            rxn_true_prec = proposals_data_valid.iloc[idxs[rxn_idx].item(), 2]
 
                             # apply template to get predicted precursor
-                            rxn = rdchiralReaction(rxn_pred_temp[-1] + '>>' + rxn_pred_temp[0]) # reverse template
+                            rxn = rdchiralReaction(rxn_pred_temp.split('>>')[-1] + '>>' + rxn_pred_temp.split('>>')[0]) # reverse template
                             prod = rdchiralReactants(rxn_true_prod)
                             rxn_pred_prec = rdchiralRun(rxn, prod)
 
-                            logging.info(f'\ncurr product:                          \t\t\t\t{rxn_true_prod}')
+                            logging.info(f'\ncurr product:                          \t\t{rxn_true_prod}')
+                            logging.info(f'pred template:                          \t{rxn_pred_temp}')
+                            logging.info(f'true template:                          \t{rxn_true_temp}')
                             if rxn_pred_class == len(templates_filtered):
-                                logging.info(f'pred precursor (score = {rxn_pred_score:+.4f}):\t\t\tNo template')
+                                logging.info(f'pred precursor (score = {rxn_pred_score:+.4f}):\t\tNULL template')
+                            elif len(rxn_pred_prec) == 0:
+                                logging.info(f'pred precursor (score = {rxn_pred_score:+.4f}):\t\tTemplate could not be applied')
                             else:
-                                logging.info(f'pred precursor (score = {rxn_pred_score:+.4f}):\t\t\t{rxn_pred_prec}')
-                            logging.info(f'true precursor (score = {rxn_true_score:+.4f}):\t\t\t{rxn_true_prec}')
+                                logging.info(f'pred precursor (score = {rxn_pred_score:+.4f}):\t\t{rxn_pred_prec}')
+                            logging.info(f'true precursor (score = {rxn_true_score:+.4f}):\t\t{rxn_true_prec}')
                             break
                 except Exception as e: # do nothing # https://stackoverflow.com/questions/11414894/extract-traceback-info-from-an-exception-object/14564261#14564261
                     tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
@@ -206,8 +222,8 @@ def train(args):
             max_valid_acc = max(max_valid_acc, valid_accs[-1])
 
         message = f"\nEnd of epoch: {epoch}, \
-            \ntrain loss: {train_losses[-1]:.4f}, train acc: {train_accs[-1]:.4f}, \
-            \nvalid loss: {valid_losses[-1]:.4f}, valid acc: {valid_accs[-1]:.4f} \
+            \ntrain loss: {train_losses[-1]:.4f}, train top-1 acc: {train_accs[-1]:.4f}, \
+            \nvalid loss: {valid_losses[-1]:.4f}, valid top-1 acc: {valid_accs[-1]:.4f} \
             \n"
         logging.info(message)
 
@@ -221,7 +237,9 @@ def test(model, args):
                             args.prodfps_prefix+'_test.npz', 
                             args.labels_prefix+'_test.npy'
                         )
+    test_size = len(test_dataset)
     test_loader = DataLoader(test_dataset, batch_size=args.bs_eval, shuffle=False)
+    del test_dataset
 
     proposals_data_test = pd.read_csv(
         DATA_FOLDER / f"{args.csv_prefix}_test.csv", 
@@ -241,14 +259,60 @@ def test(model, args):
 
             test_loss += loss.item()
             test_seen += labels.shape[0]
-            batch_preds = nn.Softmax(dim=-1)(outputs) # need to store top-K
-            test_correct += torch.eq(batch_preds, labels)
+            outputs = nn.Softmax(dim=-1)(outputs) 
+            batch_preds = torch.topk(outputs, k=1)[1].squeeze(dim=-1) # TODO: include top-K accuracy
+            test_correct += torch.sum(
+                            torch.eq(
+                                torch.topk(batch_preds, k=1)[1].squeeze(dim=-1), labels
+                            ), dim=0
+                        ).item()
 
             test_loader.set_description(f"testing: loss={test_loss/test_seen:.4f}, acc={test_correct/test_seen:.4f}")
             test_loader.refresh()
 
-            # TODO: display some examples + model predictions/labels for monitoring model generalization
+            # display some examples + model predictions/labels for monitoring model generalization
+            try:
+                for j in range(i * args.bs_eval, (i+1) * args.bs_eval):
+                    # peek at a random sample of current batch to monitor training progress
+                    if j % (test_size // 5) == random.randint(0, 3) or j % (test_size // 8) == random.randint(0, 4): 
+                        rxn_idx = random.sample(list(range(args.bs_eval)), k=1)[0]
+                        rxn_true_class = labels[rxn_idx]
+                        rxn_pred_class = int(batch_preds[rxn_idx].item())
+                        rxn_pred_score = outputs[rxn_idx, rxn_pred_class].item()
+                        rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
 
+                        # load template database
+                        rxn_pred_temp = templates_filtered[rxn_pred_class]
+                        rxn_true_temp_idx = int(proposals_data_test.iloc[idxs[rxn_idx].item(), 4])
+                        rxn_true_temp = templates_filtered[rxn_true_temp_idx]
+                        rxn_true_prod = proposals_data_test.iloc[idxs[rxn_idx].item(), 1]
+                        rxn_true_prec = proposals_data_test.iloc[idxs[rxn_idx].item(), 2]
+
+                        # apply template to get predicted precursor
+                        rxn = rdchiralReaction(rxn_pred_temp.split('>>')[-1] + '>>' + rxn_pred_temp.split('>>')[0]) # reverse template
+                        prod = rdchiralReactants(rxn_true_prod)
+                        rxn_pred_prec = rdchiralRun(rxn, prod)
+
+                        logging.info(f'\ncurr product:                          \t\t{rxn_true_prod}')
+                        logging.info(f'pred template:                          \t{rxn_pred_temp}')
+                        logging.info(f'true template:                          \t{rxn_true_temp}')
+                        if rxn_pred_class == len(templates_filtered):
+                            logging.info(f'pred precursor (score = {rxn_pred_score:+.4f}):\t\tNULL template')
+                        elif len(rxn_pred_prec) == 0:
+                            logging.info(f'pred precursor (score = {rxn_pred_score:+.4f}):\t\tTemplate could not be applied')
+                        else:
+                            logging.info(f'pred precursor (score = {rxn_pred_score:+.4f}):\t\t{rxn_pred_prec}')
+                        logging.info(f'true precursor (score = {rxn_true_score:+.4f}):\t\t{rxn_true_prec}')
+                        break
+            except Exception as e: # do nothing # https://stackoverflow.com/questions/11414894/extract-traceback-info-from-an-exception-object/14564261#14564261
+                tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
+                logging.info("".join(tb_str))
+                logging.info('\nIndex out of range (last minibatch)')
+
+    message = f" \
+    \ttest loss: {test_loss/test_seen:.4f}, test top-1 acc: {test_correct/test_seen:.4f} \
+    \n"
+    logging.info(message)
     logging.info('Finished Testing')
 
 def parse_args():
