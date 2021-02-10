@@ -11,6 +11,7 @@ import multiprocessing
 
 from functools import partial
 from datetime import datetime
+from collections import defaultdict
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 from scipy import sparse
@@ -37,8 +38,17 @@ def mol_smi_to_count_fp(
     DataStructs.ConvertToNumpyArray(uint_count_fp, count_fp)
     return sparse.csr_matrix(count_fp, dtype=dtype)
 
-# use fp_size = 32681 and radius = 2 for now
-# TODO: fold to 1,000,000-dim --> log(x+1) --> variance threshold into 32681
+def gen_prod_fps_helper(args, rxn_smi):
+    prod_smi_map = rxn_smi.split('>>')[-1]
+    prod_mol = Chem.MolFromSmiles(prod_smi_map)
+    [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
+    prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
+    # Sometimes stereochem takes another canonicalization... (just in case)
+    prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
+    
+    prod_fp = mol_smi_to_count_fp(prod_smi_nomap, args.radius, args.fp_size)
+    return prod_smi_nomap, prod_fp
+
 def gen_prod_fps(args):
     # parallelizing makes it very slow for some reason
     for phase in ['train', 'valid', 'test']:
@@ -47,19 +57,31 @@ def gen_prod_fps(args):
         with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
             clean_rxnsmi_phase = pickle.load(f)
 
+        num_cores = len(os.sched_getaffinity(0))
+        logging.info(f'Parallelizing over {num_cores} cores')
+        pool = multiprocessing.Pool(num_cores)
+
         phase_prod_smi_nomap = []
         phase_rxn_prod_fps = []
-        for rxn_id, rxn_smi in enumerate(tqdm(clean_rxnsmi_phase, desc='Processing rxn_smi')):
-            prod_smi_map = rxn_smi.split('>>')[-1]
-            prod_mol = Chem.MolFromSmiles(prod_smi_map)
-            [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
-            prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
-            # Sometimes stereochem takes another canonicalization... (just in case)
-            prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
-            phase_prod_smi_nomap.append(prod_smi_nomap)
-
-            prod_fp = mol_smi_to_count_fp(prod_smi_nomap, args.radius, args.fp_size)
+        gen_prod_fps_partial = partial(gen_prod_fps_helper, args)
+        for result in tqdm(pool.imap(gen_prod_fps_partial, clean_rxnsmi_phase),
+                            total=len(clean_rxnsmi_phase), desc='Processing rxn_smi'):
+            prod_smi_nomap, prod_fp = result
+            hase_prod_smi_nomap.append(prod_smi_nomap)
             phase_rxn_prod_fps.append(prod_fp)
+
+        # unparallelized version
+        # for rxn_smi in tqdm(clean_rxnsmi_phase, desc='Processing rxn_smi'):
+            # prod_smi_map = rxn_smi.split('>>')[-1]
+            # prod_mol = Chem.MolFromSmiles(prod_smi_map)
+            # [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
+            # prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
+            # # Sometimes stereochem takes another canonicalization... (just in case)
+            # prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
+            # phase_prod_smi_nomap.append(prod_smi_nomap)
+
+            # prod_fp = mol_smi_to_count_fp(prod_smi_nomap, args.radius, args.fp_size)
+            # phase_rxn_prod_fps.append(prod_fp)
 
         # these are the input data into the network
         phase_rxn_prod_fps = sparse.vstack(phase_rxn_prod_fps)
@@ -71,22 +93,32 @@ def gen_prod_fps(args):
         with open(args.data_folder / f"{args.output_file_prefix}_prod_smis_nomap_{phase}.smi", 'wb') as f:
             pickle.dump(phase_prod_smi_nomap, f, protocol=4)
 
+def log_row(row):
+    return sparse.csr_matrix(np.log(row.toarray() + 1))
+
 def variance_cutoff(args):
     for phase in ['train', 'valid', 'test']:
         prod_fps = sparse.load_npz(args.data_folder / f"{args.output_file_prefix}_prod_fps_{phase}.npz")
 
-        # take log(x+1), ~18 min for 1mil-dim on 8 cores (no parallelization)
-        def log_one_fp(prod_fp_sparse_row):
-            return sparse.csr_matrix(np.log(prod_fp_sparse_row.toarray() + 1))
+        # take log(x+1), ~2.5 min for 1mil-dim on 8 cores (parallelized)
+        rows = []
+        for row_idx in tqdm(range(prod_fps.shape[0])):
+            rows.append(prod_fps[row_idx])
+
+        num_cores = len(os.sched_getaffinity(0))
+        logging.info(f'Parallelizing over {num_cores} cores')
+        pool = multiprocessing.Pool(num_cores)
 
         logged = []
-        for row_idx in tqdm(range(prod_fps.shape[0]), desc='Taking log(x+1)'):
-            logged.append(
-                sparse.csr_matrix(np.log(prod_fps[row_idx].toarray() + 1)) # immediately convert back to csr to save memory
-            )
+        # imap is much, much faster than map 
+        for result in tqdm(pool.imap(log_row, rows),
+                       total=len(rows), desc='Taking log(x+1)'):
+            logged.append(result)
         logged = sparse.vstack(logged)
 
         # collect variance statistics by column index from training product fingerprints
+        # currently VERY slow with 2 for-loops to access each element individually.
+        # idea: tranpose the sparse matrix, then go through 1 million rows using pool.imap
         if phase == 'train':
             indices = defaultdict(lambda: [])
             for row_idx in tqdm(range(logged.shape[0]), desc='Collecting fingerprint values by indices'):
@@ -153,6 +185,7 @@ def get_train_templates(args):
     logging.info(f'Parallelizing over {num_cores} cores')
     pool = multiprocessing.Pool(num_cores)
     invalid_temp = 0
+    # here the order doesn't matter since we just want a dictionary of templates
     for result in tqdm(pool.imap_unordered(get_tpl, rxns),
                         total=len(rxns)):
         idx, template = result
@@ -281,7 +314,8 @@ def match_templates(args):
         labels = []
         found = 0
         get_template_partial = partial(get_template_idx, temps_filtered)
-        for result in tqdm(pool.imap_unordered(get_template_partial, tasks),
+        # don't use imap_unordered!!!! it doesn't guarantee the order (but might be faster I guess)
+        for result in tqdm(pool.imap(get_template_partial, tasks), 
                        total=len(tasks)):
             rxn_idx, template_idx = result
 
