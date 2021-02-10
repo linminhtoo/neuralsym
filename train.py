@@ -59,6 +59,7 @@ def train(args):
         input_size=args.fp_size
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    logging.info(f'Using {device} device')
     model = model.to(device)
 
     criterion = nn.CrossEntropyLoss(reduction='sum')

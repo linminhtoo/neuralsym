@@ -70,19 +70,6 @@ def gen_prod_fps(args):
             hase_prod_smi_nomap.append(prod_smi_nomap)
             phase_rxn_prod_fps.append(prod_fp)
 
-        # unparallelized version
-        # for rxn_smi in tqdm(clean_rxnsmi_phase, desc='Processing rxn_smi'):
-            # prod_smi_map = rxn_smi.split('>>')[-1]
-            # prod_mol = Chem.MolFromSmiles(prod_smi_map)
-            # [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
-            # prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
-            # # Sometimes stereochem takes another canonicalization... (just in case)
-            # prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
-            # phase_prod_smi_nomap.append(prod_smi_nomap)
-
-            # prod_fp = mol_smi_to_count_fp(prod_smi_nomap, args.radius, args.fp_size)
-            # phase_rxn_prod_fps.append(prod_fp)
-
         # these are the input data into the network
         phase_rxn_prod_fps = sparse.vstack(phase_rxn_prod_fps)
         sparse.save_npz(
@@ -90,19 +77,21 @@ def gen_prod_fps(args):
             phase_rxn_prod_fps
         )
 
-        with open(args.data_folder / f"{args.output_file_prefix}_prod_smis_nomap_{phase}.smi", 'wb') as f:
+        with open(args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_prod_smis_nomap_{phase}.smi", 'wb') as f:
             pickle.dump(phase_prod_smi_nomap, f, protocol=4)
 
 def log_row(row):
     return sparse.csr_matrix(np.log(row.toarray() + 1))
 
+def var_col(col):
+    return np.var(col.toarray())
+
 def variance_cutoff(args):
     for phase in ['train', 'valid', 'test']:
         prod_fps = sparse.load_npz(args.data_folder / f"{args.output_file_prefix}_prod_fps_{phase}.npz")
-
-        rows = []
-        for row_idx in tqdm(range(prod_fps.shape[0])):
-            rows.append(prod_fps[row_idx])
+        # rows = []
+        # for row_idx in tqdm(range(prod_fps.shape[0])):
+        #     rows.append(prod_fps[row_idx])
 
         num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
@@ -111,27 +100,24 @@ def variance_cutoff(args):
         logged = []
         # imap is much, much faster than map
         # take log(x+1), ~2.5 min for 1mil-dim on 8 cores (parallelized)
-        for result in tqdm(pool.imap(log_row, rows),
-                       total=len(rows), desc='Taking log(x+1)'):
+        for result in tqdm(pool.imap(log_row, prod_fps),
+                       total=prod_fps.shape[0], desc='Taking log(x+1)'):
             logged.append(result)
         logged = sparse.vstack(logged)
 
         # collect variance statistics by column index from training product fingerprints
-        # currently VERY slow with 2 for-loops to access each element individually.
+        # VERY slow with 2 for-loops to access each element individually.
         # idea: tranpose the sparse matrix, then go through 1 million rows using pool.imap 
-        # massive speed up from 280 hours to 1 hour on 8 cores, i guess now I just have to use more cores to speed it up even more
+        # massive speed up from 280 hours to 1 hour on 8 cores
         logged = logged.transpose()     # [39713, 1 mil] -> [1 mil, 39713]
+
         if phase == 'train':
             # no need to store all the values from each col_idx (results in OOM). just calc variance immediately, and move on
-            # indices = defaultdict(lambda: [])
             vars = []
-            for col_idx in tqdm(range(logged.shape[0]), desc='Collecting fingerprint values by indices'):
-                # indices[col_idx].append(logged[col_idx].toarray())
-                vars.append(np.var(logged[col_idx].toarray()))
-            # for row_idx in tqdm(range(logged.shape[0]), desc='Collecting fingerprint values by indices'):
-            #     for col_idx in range(logged.shape[1]):
-            #         indices[col_idx].append(logged[row_idx, col_idx])
-
+            # imap directly on csr_matrix is the fastest!!! from 1 hour --> ~2 min on 20 cores (parallelized)
+            for result in tqdm(pool.imap(var_col, logged),
+                       total=logged.shape[0], desc='Collecting fingerprint values by indices'):
+                vars.append(result)
             indices_ordered = list(range(logged.shape[0])) # should be 1,000,000
             indices_ordered.sort(key=lambda x: vars[x], reverse=True)
 
@@ -196,8 +182,7 @@ def get_train_templates(args):
         if 'reaction_smarts' not in template:
             invalid_temp += 1
             continue # no template could be extracted
-        # template = template['reaction_smarts']
-        ###############################################################
+
         # canonicalize template (needed, bcos q a number of templates are duplicates I think, 10247 --> 10150)
         p_temp = cano_smarts(template['products']) # reaction_smarts
         r_temp = cano_smarts(template['reactants'])
@@ -207,11 +192,6 @@ def get_train_templates(args):
             templates[cano_temp] = 1
         else:
             templates[cano_temp] += 1
-        ###############################################################
-        # if template not in templates:
-        #     templates[template] = 1
-        # else:
-        #     templates[template] += 1
 
     logging.info(f'No of rxn where template extraction failed: {invalid_temp}')
 
@@ -262,7 +242,7 @@ def get_template_idx(temps_filtered, task):
     cano_temp = r_temp + '>>' + p_temp
 
     for temp_idx, extr_temp in enumerate(temps_filtered):
-        if extr_temp == cano_temp:
+        if extr_temp == cano_temp or extr_temp == rxn_template['reaction_smarts']:
             return rxn_idx, temp_idx # template_idx = label
     ############################################################
     
@@ -318,7 +298,7 @@ def match_templates(args):
         labels = []
         found = 0
         get_template_partial = partial(get_template_idx, temps_filtered)
-        # don't use imap_unordered!!!! it doesn't guarantee the order (but might be faster I guess)
+        # don't use imap_unordered!!!! it doesn't guarantee the order, or we can use it and then sort by rxn_idx
         for result in tqdm(pool.imap(get_template_partial, tasks), 
                        total=len(tasks)):
             rxn_idx, template_idx = result
@@ -378,8 +358,7 @@ def parse_args():
                         type=str)
     parser.add_argument("--templates_file", help="Filename of templates extracted from training data", 
                         type=str, default='50k_training_templates')
-    # parser.add_argument("--parallelize", help="Whether to parallelize over all available cores", action="store_true")
-    
+
     parser.add_argument("--min_freq", help="Minimum frequency of template in training data to be retained", type=int, default=1)
     parser.add_argument("--radius", help="Fingerprint radius", type=int, default=2)
     parser.add_argument("--fp_size", help="Fingerprint size", type=int, default=1000000)
@@ -388,7 +367,6 @@ def parse_args():
     return parser.parse_args()
 
 if __name__ == '__main__':
-    # NOTE: rmbr to use allmapped_canon_{phase}.pickle
     args = parse_args()
  
     RDLogger.DisableLog("rdApp.warning")
@@ -421,7 +399,7 @@ if __name__ == '__main__':
         variance_cutoff(args)
 
     args.output_file_prefix = f'{args.output_file_prefix}_to_{args.final_fp_size}'
-    
+
     if not (args.data_folder / args.templates_file).exists():
         # ~40 sec on 40k train rxn_smi on 16 cores
         get_train_templates(args)

@@ -4,14 +4,13 @@ conda activate neuralsym
 # cannot use too high LR, will diverge slowly (loss increases > 20)
 # higher bs --> faster training (using CPU)
 python train.py \
-    --expt_name 'prelim_lr1e3_ep60_bs800_depth3_hidden300' \
+    --expt_name 'prelim_lr1e3_ep60_bs300_fixed' \
     --do_train \
     --do_test \
-    --prodfps_prefix 50k_32681dim_2rad_prod_fps \
-    --labels_prefix 50k_32681dim_2rad_labels \
-    --csv_prefix 50k_32681dim_2rad_csv \
-    --checkpoint \
-    --bs 800 \
+    --prodfps_prefix 50k_1000000dim_2rad_to_32681_prod_fps \
+    --labels_prefix 50k_1000000dim_2rad_to_32681_labels \
+    --csv_prefix 50k_1000000dim_2rad_to_32681_csv \
+    --bs 300 \
     --bs_eval 300 \
     --random_seed 1337 \
     --learning_rate 1e-3 \
@@ -21,3 +20,5 @@ python train.py \
     --depth 5 \
     --hidden_size 512
 
+    # --checkpoint \
+    # don't checkpoint first as model is very big, 600M
