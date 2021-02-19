@@ -3,6 +3,7 @@ conda activate neuralsym
 
 # cannot use too high LR, will diverge slowly (loss increases > 20)
 # higher bs --> faster training (using CPU)
+# 8 sec/epoch on 1 GPU lmao
 python train.py \
     --expt_name 'prelim_lr1e3_ep60_bs300_fixed' \
     --do_train \
@@ -17,8 +18,8 @@ python train.py \
     --epochs 60 \
     --early_stop \
     --early_stop_patience 4 \
-    --depth 5 \
-    --hidden_size 512
+    --depth 1 \
+    --hidden_size 100
 
     # --checkpoint \
     # don't checkpoint first as model is very big, 600M

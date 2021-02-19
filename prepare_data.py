@@ -20,7 +20,6 @@ from tqdm import tqdm
 from rdkit import RDLogger
 from rdkit import Chem, DataStructs
 from rdkit.Chem.rdFingerprintGenerator import GetMorganGenerator
-
 from rdchiral.main import rdchiralReaction, rdchiralReactants, rdchiralRun
 from rdchiral.template_extractor import extract_from_reaction
 
@@ -89,9 +88,6 @@ def var_col(col):
 def variance_cutoff(args):
     for phase in ['train', 'valid', 'test']:
         prod_fps = sparse.load_npz(args.data_folder / f"{args.output_file_prefix}_prod_fps_{phase}.npz")
-        # rows = []
-        # for row_idx in tqdm(range(prod_fps.shape[0])):
-        #     rows.append(prod_fps[row_idx])
 
         num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
@@ -144,8 +140,10 @@ def get_tpl(task):
 def cano_smarts(smarts):
     tmp = Chem.MolFromSmarts(smarts)
     if tmp is None:
-        return None, smarts
-    [a.ClearProp('molAtomMapNumber') for a in tmp.GetAtoms()]
+        logging.info(f'Could not parse {smarts}')
+        return smarts
+    # do not remove atom map number
+    # [a.ClearProp('molAtomMapNumber') for a in tmp.GetAtoms()]
     cano = Chem.MolToSmarts(tmp)
     if '[[se]]' in cano:  # strange parse error
         cano = smarts
@@ -183,10 +181,12 @@ def get_train_templates(args):
             invalid_temp += 1
             continue # no template could be extracted
 
+        # DO NOT CANO FOR NOW
         # canonicalize template (needed, bcos q a number of templates are duplicates I think, 10247 --> 10150)
-        p_temp = cano_smarts(template['products']) # reaction_smarts
-        r_temp = cano_smarts(template['reactants'])
-        cano_temp = r_temp + '>>' + p_temp
+        # p_temp = cano_smarts(template['products']) # reaction_smarts
+        # r_temp = cano_smarts(template['reactants'])
+        # cano_temp = r_temp + '>>' + p_temp
+        cano_temp = template['reaction_smarts']
 
         if cano_temp not in templates:
             templates[cano_temp] = 1
@@ -200,80 +200,66 @@ def get_train_templates(args):
     with open(args.data_folder / args.templates_file, 'w') as f:
         f.writelines(templates)
 
-def get_template_idx(temps_filtered, task):
-    # extract template for this rxn_smi, and match it to template dictionary from training data
-    rxn_idx, rxn_smi = task
-    r = rxn_smi.split('>>')[0]
-    p = rxn_smi.split('>>')[-1]
-    
+def get_template_idx(temps_dict, task):
+    # rxn_idx, r, p = task
+
+    # seems to work, but fails to recover a lot of templates even in training set, not sure why
     # apply each template in database to product, & see if we recover ground truth
-    # DOESNT WORK, cannot recover ground truth precursors at all even for training set
     # prod = rdchiralReactants(p)
-    # for temp_idx, pattern in enumerate(temps_filtered):
-    #     # reverse template
-    #     rxn = rdchiralReaction(
-    #         pattern.split('>>')[-1] + '>>' + \
-    #         pattern.split('>>')[0]
-    #     )
+    # for temp_idx, pattern in enumerate(temps_dict):
+    #     # reverse template, but apparently dunnid # pattern.split('>>')[-1] + '>>' + pattern.split('>>')[0]
+    #     rxn = rdchiralReaction(pattern)
     #     try:
     #         pred_prec = rdchiralRun(rxn, prod)
     #     except:
-    #         continue
-    #     # canonicalize precursor
-    #     pred_prec = '.'.join(pred_prec)
-    #     try:
-    #         pred_prec = Chem.MolToSmiles(Chem.MolFromSmiles(pred_prec))
-    #     except Exception as e:
-    #         # print(e)
-    #         continue
-    #     if pred_prec == r:
-    #         # logging.info(f'Found {temp_idx}')
-    #         return rxn_idx, temp_idx # template_idx = label
+    #         pred_prec = None
+
+    #     if pred_prec:
+    #         if r in pred_prec:
+    #             return rxn_idx, temp_idx
+    #         # canonicalize precursor
+    #         cano_prec = []
+    #         for prec in pred_prec:
+    #             try:
+    #                 cano_prec.append(Chem.MolToSmiles(Chem.MolFromSmiles(prec)))
+    #             except:
+    #                 pass
+    #         if r in cano_prec:
+    #             return rxn_idx, temp_idx # template_idx == label
+    # return rxn_idx, len(temps_dict) # no template matching
     
     ############################################################
     # original label generation pipeline
-    rxn = (rxn_idx, r, p)
-    rxn_idx, rxn_template = get_tpl(rxn)
+    # extract template for this rxn_smi, and match it to template dictionary from training data
+    # rxn = (rxn_idx, r, p)
+    rxn_idx, rxn_template = get_tpl(task)
 
     if 'reaction_smarts' not in rxn_template:
         return rxn_idx, -1 # unable to extract template
-    p_temp = cano_smarts(rxn_template['products'])
-    r_temp = cano_smarts(rxn_template['reactants'])
-    cano_temp = r_temp + '>>' + p_temp
+    # p_temp = cano_smarts(rxn_template['products'])
+    # r_temp = cano_smarts(rxn_template['reactants'])
+    # cano_temp = r_temp + '>>' + p_temp
+    cano_temp = rxn_template['reaction_smarts']
 
-    for temp_idx, extr_temp in enumerate(temps_filtered):
-        if extr_temp == cano_temp or extr_temp == rxn_template['reaction_smarts']:
-            return rxn_idx, temp_idx # template_idx = label
+    if cano_temp in temps_dict:
+        return rxn_idx, temps_dict[cano_temp]
+    else:
+        return rxn_idx, len(temps_dict) # no template matching
     ############################################################
-    
-    ############################################################
-    # original code from RetroXpert
-        # pattern_mol = Chem.MolFromSmarts(pattern)
-    #     if pattern_mol is None:
-    #         logging.info('error: pattern_mol is None')
-    #     try:
-    #         matches = rxn_mol.GetSubstructMatches(
-    #                         pattern_mol,
-    #                         useChirality=True
-    #                     ) # TODO: should this be False? (in RetroXpert it's False)
-    #     except:
-    #         continue
-    #     else:
-    #         if len(matches) > 0:
-    #             return rxn_idx, temp_idx # template_idx = label
-    # logging.info(rxn_smi)
-    ############################################################
-    return rxn_idx, len(temps_filtered) # no template matching
 
 def match_templates(args):
     logging.info(f'Loading templates from file: {args.templates_file}')
     with open(args.data_folder / args.templates_file, 'r') as f:
-        templates = f.readlines()
+        lines = f.readlines()
     temps_filtered = []
-    for p in templates:
-        pa, cnt = p.strip().split(': ')
+    temps_dict = {} # build mapping from temp to idx for O(1) find
+    temps_idx = 0
+    for l in lines:
+        pa, cnt = l.strip().split(': ')
         if int(cnt) >= args.min_freq:
             temps_filtered.append(pa)
+            temps_dict[pa] = temps_idx
+            temps_idx += 1
     logging.info(f'Total number of template patterns: {len(temps_filtered)}')
 
     logging.info('Matching against extracted templates')
@@ -284,9 +270,21 @@ def match_templates(args):
         with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
             clean_rxnsmi_phase = pickle.load(f)
         
-        tasks = [
-            (idx, rxn_smi) for idx, rxn_smi in enumerate(clean_rxnsmi_phase)
-        ]
+        tasks = []
+        for idx, rxn_smi in tqdm(enumerate(clean_rxnsmi_phase), desc='Building tasks', total=len(clean_rxnsmi_phase)):
+            # rcts_smi_map = rxn_smi.split('>>')[0]
+            # rcts_mol = Chem.MolFromSmiles(rcts_smi_map)
+            # [atom.ClearProp('molAtomMapNumber') for atom in rcts_mol.GetAtoms()]
+            # rcts_smi_nomap = Chem.MolToSmiles(rcts_mol, True)
+            # # Sometimes stereochem takes another canonicalization...
+            # rcts_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(rcts_smi_nomap), True)
+
+            # prod_smi_nomap = phase_prod_smi_nomap[idx]
+
+            # tasks.append((idx, rcts_smi_nomap, prod_smi_nomap))
+            r = rxn_smi.split('>>')[0]
+            p = rxn_smi.split('>>')[1]
+            tasks.append((idx, r, p))
 
         num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
@@ -297,7 +295,7 @@ def match_templates(args):
         rows = []
         labels = []
         found = 0
-        get_template_partial = partial(get_template_idx, temps_filtered)
+        get_template_partial = partial(get_template_idx, temps_dict)
         # don't use imap_unordered!!!! it doesn't guarantee the order, or we can use it and then sort by rxn_idx
         for result in tqdm(pool.imap(get_template_partial, tasks), 
                        total=len(tasks)):
@@ -314,15 +312,14 @@ def match_templates(args):
             rows.append([
                 rxn_idx,
                 phase_prod_smi_nomap[rxn_idx],
-                rcts_smi_nomap,
-                template,
+                rcts_smi_nomap, # tasks[rxn_idx][1]
+                template, 
                 template_idx,
             ])
             labels.append(template_idx)
             found += (template_idx != len(temps_filtered))
 
             if phase == 'train' and template_idx == len(temps_filtered):
-                # should be 0 for USPTO-50K
                 logging.info(f'At {rxn_idx} of train, could not recall template for some reason')
         
         logging.info(f'Template coverage: {found / len(tasks) * 100:.2f}%')
@@ -404,7 +401,7 @@ if __name__ == '__main__':
         # ~40 sec on 40k train rxn_smi on 16 cores
         get_train_templates(args)
     if not (args.data_folder / f"{args.output_file_prefix}_csv_train.csv").exists():
-        # ~3 min on 40k train rxn_smi on 16 cores
+        # ~3-4 min on 40k train rxn_smi on 16 cores
         match_templates(args)
     
     logging.info('Done!')

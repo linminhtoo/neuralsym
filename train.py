@@ -167,6 +167,7 @@ def train(args):
                             rxn_true_prec = proposals_data_valid.iloc[idxs[rxn_idx].item(), 2]
 
                             # apply template to get predicted precursor
+                            # TODO: need to fix this. why template could not be applied even though it's correct
                             rxn = rdchiralReaction(rxn_pred_temp.split('>>')[-1] + '>>' + rxn_pred_temp.split('>>')[0]) # reverse template
                             prod = rdchiralReactants(rxn_true_prod)
                             rxn_pred_prec = rdchiralRun(rxn, prod)
