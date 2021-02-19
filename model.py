@@ -71,13 +71,19 @@ class TemplateNN(nn.Module):
                 size=size, num_layers=1, f=f, dropout=dropout_head, 
                 head=True, input_size=input_size
             )
-        self.highway_body = Highway(
-                size=size, num_layers=num_layers_body, 
-                f=f, dropout=dropout_body
-            )
+        if num_layers_body <= 0:
+            self.highway_body = None
+        else:
+            self.highway_body = Highway(
+                    size=size, num_layers=num_layers_body, 
+                    f=f, dropout=dropout_body
+                )
         
         self.classifier = nn.Linear(size, output_size)
 
     def forward(self, fp):
-        embedding = self.highway_body(self.highway_head(fp))
+        if self.highway_body:
+            embedding = self.highway_body(self.highway_head(fp))
+        else:
+            embedding = self.highway_head(fp)
         return self.classifier(embedding).squeeze(dim=1)
