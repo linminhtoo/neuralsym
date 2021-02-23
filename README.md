@@ -17,7 +17,7 @@ I have provided a sample ```train.sh``` file with sensible hyperparameters that 
 On 1x RTX2080 one epoch takes 8 seconds, and the whole training finishes in <5 minutes. 
 The training arguments can be found in ```train.py``` & should be self-explanatory. I plan to do a quick bayesian optimization using Optuna, but don't expect any fancy improvements (<1% probably).
 
-A fully trained model that scored 40.28% top-1 & 75.1% top-50 on the test set is included in the ```trained_model/``` folder and you need to move it into the ```checkpoint/``` folder (pardon this slight inconvenience). The logs from training that model are also included in ```logs_sample/```.  Note that it is quite sizeable, ~374, so I don't recommend checkpointing models until you're sure that you have what you need. 
+A fully trained model that scored 40.28% top-1 & 75.1% top-50 on the test set is uploaded on google drive [here](https://drive.google.com/drive/folders/1NUWo7Ir5bnCRMluAYf2LqAkMm-TmiQRz?usp=sharing) and you need to save it into the ```checkpoint/``` folder. The logs from training that model are also included in ```logs_sample/```.  Note that it is quite sizeable, ~374M, so I don't recommend checkpointing models until you're sure that you have what you need. 
 
 I have also incorporated some neat visualization code in the validation/testing step to print some examples of reactions & the model's predictions, e.g.:
 ```
@@ -25,12 +25,12 @@ curr product:                       COC(=O)c1cccc2[nH]c(NCC3CCNCC3)nc12
 pred template:                      [C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
 true template:                      [C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
 pred precursor (score = +0.9984):   ['COC(=O)c1cccc2[nH]c(NCC3CCN(C(=O)OC(C)(C)C)CC3)nc12']
-true precursor (score = +0.9984):	COC(=O)c1cccc2[nH]c(NCC3CCN(C(=O)OC(C)(C)C)CC3)nc12
+true precursor (score = +0.9984):   COC(=O)c1cccc2[nH]c(NCC3CCN(C(=O)OC(C)(C)C)CC3)nc12
 
 curr product:                       COc1ccc(I)c(OCC2CO2)c1
 pred template:                      [#8:3]-[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:4]-[c:5]>>Cl-[C&H2&D2&+0:1]-[C:2]-[#8:3].[O&H1&D1&+0:4]-[c:5]
 true template:                      [#8:3]-[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:4]-[c:5]>>Cl-[C&H2&D2&+0:1]-[C:2]-[#8:3].[O&H1&D1&+0:4]-[c:5]
-pred precursor (score = +0.9820):	['COc1ccc(I)c(O)c1.ClCC1CO1']
+pred precursor (score = +0.9820):   ['COc1ccc(I)c(O)c1.ClCC1CO1']
 true precursor (score = +0.9820):   COc1ccc(I)c(O)c1.ClCC1CO1
 ```
 

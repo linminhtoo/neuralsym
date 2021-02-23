@@ -197,7 +197,7 @@ def train(args):
                             rxn_true_prec = proposals_data_valid.iloc[idxs[rxn_idx].item(), 2]
 
                             # apply template to get predicted precursor, no need to reverse bcos alr: p_temp >> r_temp
-                            rxn = rdchiralReaction(rxn_pred_temp) # rxn_pred_temp.split('>>')[-1] + '>>' + rxn_pred_temp.split('>>')[0]
+                            rxn = rdchiralReaction(rxn_pred_temp)
                             prod = rdchiralReactants(rxn_true_prod)
                             rxn_pred_prec = rdchiralRun(rxn, prod)
 
@@ -213,8 +213,8 @@ def train(args):
                             logging.info(f'true precursor (score = {rxn_true_score:+.4f}):\t\t{rxn_true_prec}')
                             break
                 except Exception as e: # do nothing # https://stackoverflow.com/questions/11414894/extract-traceback-info-from-an-exception-object/14564261#14564261
-                    tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
-                    logging.info("".join(tb_str))
+                    # tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
+                    # logging.info("".join(tb_str))
                     logging.info('\nIndex out of range (last minibatch)')
 
         # valid_losses.append(valid_loss/valid_seen)
@@ -350,15 +350,16 @@ def test(model, args):
                         rxn_true_class = labels[rxn_idx]
                         rxn_pred_class = int(batch_preds[rxn_idx].item())
                         rxn_pred_score = outputs[rxn_idx, rxn_pred_class].item()
-                        rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
 
                         # load template database
                         rxn_pred_temp = templates_filtered[rxn_pred_class]
                         rxn_true_temp_idx = int(proposals_data_test.iloc[idxs[rxn_idx].item(), 4])
-                        if rxn_true_temp_idx < len(templates_filtered):
-                            rxn_true_temp = templates_filtered[rxn_true_temp_idx]
+                        if rxn_true_temp_idx < len(templates_filtered) and rxn_true_class < len(templates_filtered):
+                            rxn_true_temp = templates_filtered[rxn_true_temp_idx]]
+                            rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
                         else:
                             rxn_true_temp = 'Template not in training data'
+                            rxn_true_score = 'N/A'
                         rxn_true_prod = proposals_data_test.iloc[idxs[rxn_idx].item(), 1]
                         rxn_true_prec = proposals_data_test.iloc[idxs[rxn_idx].item(), 2]
 
@@ -379,8 +380,8 @@ def test(model, args):
                         logging.info(f'true precursor (score = {rxn_true_score:+.4f}):\t\t{rxn_true_prec}')
                         break
             except Exception as e: # do nothing # https://stackoverflow.com/questions/11414894/extract-traceback-info-from-an-exception-object/14564261#14564261
-                tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
-                logging.info("".join(tb_str))
+                # tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
+                # logging.info("".join(tb_str))
                 logging.info('\nIndex out of range (last minibatch)')
 
     message = f" \
@@ -455,14 +456,7 @@ if __name__ == '__main__':
     sh.setLevel(logging.INFO)
     logger.addHandler(fh)
     logger.addHandler(sh)
-
-    if args.labels_prefix is None:
-        args.labels_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_labels'
-    if args.prodfps_prefix is None:
-        args.prodfps_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_prod_fps'
-    if args.csv_prefix is None:
-        args.csv_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_csv'
-
+    
     logging.info(args)
     if args.do_train:
         model = train(args)
