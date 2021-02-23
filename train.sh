@@ -3,7 +3,7 @@ conda activate neuralsym
 
 # cannot use too high LR, will diverge slowly (loss increases > 20)
 # higher bs --> faster training (using CPU)
-# 8 sec/epoch on 1 GPU lmao
+# 8 sec/epoch on 1 RTX2080
 python train.py \
     --expt_name 'depth0_dim500_lr1e3_stop2_fac30_pat1_try' \
     --log_file 'depth0_dim500_lr1e3_stop2_fac30_pat1_try' \
@@ -24,7 +24,6 @@ python train.py \
     --lr_scheduler_factor 0.3 \
     --lr_scheduler_patience 1 \
     --checkpoint
-    # don't checkpoint first as model is very big, 600M
 
 # python train.py \
 #     --expt_name 'depth0_dim750_lr1e3_stop2_fac30_pat1' \

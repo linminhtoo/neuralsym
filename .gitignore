@@ -1,4 +1,6 @@
 __pycache__/
 checkpoint/*
-data/*
+data/old/*
+data/original_label/*
+data/original_label_cano/*
 logs/*

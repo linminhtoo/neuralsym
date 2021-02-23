@@ -182,11 +182,10 @@ def get_train_templates(args):
             logging.info(f'At {idx}, could not extract template')
             continue # no template could be extracted
 
-        # canonicalize template (needed, bcos q a number of templates are equivalent, 10247 --> 10150)
-        p_temp = cano_smarts(template['products']) # reaction_smarts
+        # canonicalize template (needed, bcos q a number of templates are equivalent, 10247 --> 10198)
+        p_temp = cano_smarts(template['products'])
         r_temp = cano_smarts(template['reactants'])
         cano_temp = p_temp + '>>' + r_temp
-        # cano_temp = template['reaction_smarts'] # if not canonicalizing
         # NOTE: 'reaction_smarts' is actually: p_temp >> r_temp !!!!! 
 
         if cano_temp not in templates:
@@ -202,8 +201,24 @@ def get_train_templates(args):
         f.writelines(templates)
 
 def get_template_idx(temps_dict, task):
-    rxn_idx, r, p = task
+    rxn_idx, r, p = task    
+    ############################################################
+    # original label generation pipeline
+    # extract template for this rxn_smi, and match it to template dictionary from training data
+    rxn = (rxn_idx, r, p) # r & p must be atom-mapped
+    rxn_idx, rxn_template = get_tpl(task)
 
+    if 'reaction_smarts' not in rxn_template:
+        return rxn_idx, -1 # unable to extract template
+    p_temp = cano_smarts(rxn_template['products'])
+    r_temp = cano_smarts(rxn_template['reactants'])
+    cano_temp = p_temp + '>>' + r_temp
+
+    if cano_temp in temps_dict:
+        return rxn_idx, temps_dict[cano_temp]
+    else:
+        return rxn_idx, len(temps_dict) # no template matching
+    
     ############################################################
     # apply each template in database to product, & see if we recover ground truth
     # seems to work, but fails to recover a lot of templates even in training set
@@ -248,25 +263,6 @@ def get_template_idx(temps_dict, task):
     # else:
     #     return rxn_idx, len(temps_dict) # no template matching
     # return rxn_idx, len(temps_dict) # no template matching
-    
-    ############################################################
-    # original label generation pipeline
-    # extract template for this rxn_smi, and match it to template dictionary from training data
-    rxn = (rxn_idx, r, p) # r & p must be atom-mapped
-    rxn_idx, rxn_template = get_tpl(task)
-
-    if 'reaction_smarts' not in rxn_template:
-        return rxn_idx, -1 # unable to extract template
-    p_temp = cano_smarts(rxn_template['products'])
-    r_temp = cano_smarts(rxn_template['reactants'])
-    cano_temp = p_temp + '>>' + r_temp
-    # cano_temp = rxn_template['reaction_smarts'] # note reaction_smarts is p_temp >> r_temp
-
-    if cano_temp in temps_dict:
-        return rxn_idx, temps_dict[cano_temp]
-    else:
-        return rxn_idx, len(temps_dict) # no template matching
-    ############################################################
 
 def match_templates(args):
     logging.info(f'Loading templates from file: {args.templates_file}')
@@ -293,6 +289,10 @@ def match_templates(args):
         
         tasks = []
         for idx, rxn_smi in tqdm(enumerate(clean_rxnsmi_phase), desc='Building tasks', total=len(clean_rxnsmi_phase)):
+            r = rxn_smi.split('>>')[0]
+            p = rxn_smi.split('>>')[1]
+            tasks.append((idx, r, p))
+
             # rcts_smi_map = rxn_smi.split('>>')[0]
             # rcts_mol = Chem.MolFromSmiles(rcts_smi_map)
             # [atom.ClearProp('molAtomMapNumber') for atom in rcts_mol.GetAtoms()]
@@ -303,9 +303,6 @@ def match_templates(args):
             # prod_smi_nomap = phase_prod_smi_nomap[idx]
 
             # tasks.append((idx, rcts_smi_nomap, prod_smi_nomap))
-            r = rxn_smi.split('>>')[0]
-            p = rxn_smi.split('>>')[1]
-            tasks.append((idx, r, p))
 
         num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
@@ -358,12 +355,6 @@ def match_templates(args):
             for row in rows:
                 writer.writerow(row)
 
-''' 
-(reference from RetroXpert)
-pattern_feat feature dim:  646
-# ave center per mol: 36
-'''
-
 def parse_args():
     parser = argparse.ArgumentParser("prepare_data.py")
     # file names
@@ -381,7 +372,6 @@ def parse_args():
     parser.add_argument("--radius", help="Fingerprint radius", type=int, default=2)
     parser.add_argument("--fp_size", help="Fingerprint size", type=int, default=1000000)
     parser.add_argument("--final_fp_size", help="Fingerprint size", type=int, default=32681)
-    # parser.add_argument("--fp_type", help='Fingerprint type ["count", "bit"]', type=str, default="count")
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -410,8 +400,7 @@ if __name__ == '__main__':
     logging.info(args)
 
     if not (args.data_folder / f"{args.output_file_prefix}_prod_fps_valid.npz").exists():
-        # ~2 min on 40k train prod_smi on 16 cores for 32681-dim (but no parallelization code)
-        # ~30 min on 40k train prod_smi on 8 cores for 1 mil-dim (but no parallelization code)
+        # ~2 min on 40k train prod_smi on 16 cores for 32681-dim
         gen_prod_fps(args)
     if not (args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_prod_fps_valid.npz").exists():
         variance_cutoff(args)
