@@ -467,7 +467,7 @@ if __name__ == '__main__':
             map_location=device,
         )
         model = TemplateNN(
-            output_size=len(templates_filtered)+1,
+            output_size=len(templates_filtered),
             size=args.hidden_size,
             num_layers_body=args.depth,
             input_size=args.fp_size
