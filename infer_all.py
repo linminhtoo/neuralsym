@@ -157,49 +157,31 @@ def compile_into_csv(args):
         pool = multiprocessing.Pool(num_cores)
 
         gen_precs_partial = partial(gen_precs, templates_filtered, preds, phase_topk)
-        if phase != 'train':
-            for i, result in enumerate(tqdm(pool.imap(gen_precs_partial, tasks), 
-                                total=len(clean_rxnsmi_phase), desc='Generating predicted reactants')):
-                precursors, seen, this_dup = result
-                dup_count += this_dup
+        for i, result in enumerate(tqdm(pool.imap(gen_precs_partial, tasks), 
+                            total=len(clean_rxnsmi_phase), desc='Generating predicted reactants')):
+            precursors, seen, this_dup = result
+            dup_count += this_dup
 
-                prod_smi = clean_rxnsmi_phase[i].split('>>')[-1]
-                prod_smiles_mapped_phase.append(prod_smi)
-                
-                prod_smi_nomap = proposals_data.iloc[i, 1]
-                prod_smiles_phase.append(prod_smi_nomap)
-
-                rcts_smi_nomap = proposals_data.iloc[i, 2]
-                rcts_smiles_phase.append(rcts_smi_nomap)
-
-                proposals_phase[prod_smi] = seen
-                proposed_precs_phase.append(seen)
-                proposed_precs_phase_withdups.append(precursors)
-
-            with open(DATA_FOLDER / f'precs_{phase}.pickle', 'wb') as f:
-                pickle.dump(proposed_precs_phase_withdups, f)
-            with open(DATA_FOLDER / f'seen_{phase}.pickle', 'wb') as f:
-                pickle.dump(proposed_precs_phase, f)
+            prod_smi = clean_rxnsmi_phase[i].split('>>')[-1]
+            prod_smiles_mapped_phase.append(prod_smi)
             
-            dup_count /= len(clean_rxnsmi_phase)
-            logging.info(f'Avg # dups per product: {dup_count}')
-        else:
-            with open(DATA_FOLDER / f'precs_{phase}.pickle', 'rb') as f:
-                proposed_precs_phase_withdups = pickle.load(f)
-            with open(DATA_FOLDER / f'seen_{phase}.pickle', 'rb') as f:
-                proposed_precs_phase = pickle.load(f)
-            
-            for i in range(len(clean_rxnsmi_phase)):
-                prod_smi = clean_rxnsmi_phase[i].split('>>')[-1]
-                prod_smiles_mapped_phase.append(prod_smi)
-                
-                prod_smi_nomap = proposals_data.iloc[i, 1]
-                prod_smiles_phase.append(prod_smi_nomap)
+            prod_smi_nomap = proposals_data.iloc[i, 1]
+            prod_smiles_phase.append(prod_smi_nomap)
 
-                rcts_smi_nomap = proposals_data.iloc[i, 2]
-                rcts_smiles_phase.append(rcts_smi_nomap)
+            rcts_smi_nomap = proposals_data.iloc[i, 2]
+            rcts_smiles_phase.append(rcts_smi_nomap)
 
-                proposals_phase[prod_smi] = proposed_precs_phase[i]
+            proposals_phase[prod_smi] = precursors
+            proposed_precs_phase.append(seen)
+            proposed_precs_phase_withdups.append(precursors)
+
+        with open(DATA_FOLDER / f'precs_{phase}.pickle', 'wb') as f:
+            pickle.dump(proposed_precs_phase_withdups, f)
+        with open(DATA_FOLDER / f'seen_{phase}.pickle', 'wb') as f:
+            pickle.dump(proposed_precs_phase, f)
+        
+        dup_count /= len(clean_rxnsmi_phase)
+        logging.info(f'Avg # dups per product: {dup_count}')
 
         # match predictions to true_precursors & get rank
         logging.info('\nCalculating ranks before removing duplicates')
