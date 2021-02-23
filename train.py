@@ -1,3 +1,4 @@
+
 import csv
 import sys
 import logging
@@ -18,6 +19,7 @@ from torch.utils.data import DataLoader
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
+from collections import defaultdict
 from scipy import sparse
 from tqdm import tqdm
 from rdkit import RDLogger
@@ -37,9 +39,7 @@ def seed_everything(seed: Optional[int] = 0) -> None:
     logging.info(f"Using seed: {seed}\n")
 
 def train(args):
-    # TODO: add in top-K accuracy
-    # TODO: resuming from checkpoint
-    # TODO: ReduceLROnPlateau
+    # TODO: reloading from checkpoint
     seed_everything(args.random_seed)
 
     logging.info(f'Loading templates from file: {args.templates_file}')
@@ -53,7 +53,7 @@ def train(args):
     logging.info(f'Total number of template patterns: {len(templates_filtered)}')
 
     model = TemplateNN(
-        output_size=len(templates_filtered)+1, # TODO: this should just be len(templates_filtered) and then do masking at valid/test time
+        output_size=len(templates_filtered)+1, # TODO: use len(templates_filtered) and then do masking at valid/test time?? but problem is 2/3 train rxn failed template matching
         size=args.hidden_size,
         num_layers_body=args.depth,
         input_size=args.fp_size
@@ -84,14 +84,24 @@ def train(args):
         DATA_FOLDER / f"{args.csv_prefix}_valid.csv", 
         index_col=None, dtype='str'
     )
+
+    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                    optimizer=optimizer,
+                    mode='max', # monitor top-1 val accuracy
+                    factor=args.lr_scheduler_factor,
+                    patience=args.lr_scheduler_patience,
+                    cooldown=args.lr_cooldown,
+                    verbose=True
+                )
     
     train_losses, valid_losses = [], []
-    train_accs, valid_accs = [], []    
+    k_to_calc = [1, 2, 3, 5, 10, 20, 50]
+    train_accs, val_accs = defaultdict(list), defaultdict(list)
     max_valid_acc = float('-inf')
     wait = 0 # early stopping patience counter
     start = time.time()
     for epoch in range(args.epochs):
-        train_loss, train_correct, train_seen = 0, 0, 0
+        train_loss, train_correct, train_seen = 0, defaultdict(int), 0
         train_loader = tqdm(train_loader, desc='training')
         model.train()
         for i, data in enumerate(train_loader):
@@ -101,7 +111,6 @@ def train(args):
             model.zero_grad()
             optimizer.zero_grad()
             outputs = model(inputs)
-            # print(outputs.shape, labels.shape, inputs.shape)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -109,21 +118,25 @@ def train(args):
             train_loss += loss.item()
             train_seen += labels.shape[0]
             outputs = nn.Softmax(dim=1)(outputs)
-            batch_preds = torch.topk(outputs, k=1)[1].squeeze(dim=-1)
-            # print(batch_preds.shape, labels.shape)
-            train_correct += torch.sum(
-                torch.eq(
-                    batch_preds, labels
-                ), dim=0
-            ).item()
-            train_loader.set_description(f"training: loss={train_loss/train_seen:.4f}, acc={train_correct/train_seen:.4f}")
+
+            for k in k_to_calc:
+                batch_preds = torch.topk(outputs, k=k, dim=1)[1]
+                train_correct[k] += torch.where(batch_preds == labels.view(-1,1).expand_as(batch_preds))[0].shape[0]
+                # train_correct[k] += torch.sum( # need to squeeze torch.topk, doesnt work for multiple top-K
+                #     torch.eq(
+                #         batch_preds, labels
+                #     ), dim=0
+                # ).item()
+
+            train_loader.set_description(f"training: loss={train_loss/train_seen:.4f}, top-1 acc={train_correct[1]/train_seen:.4f}")
             train_loader.refresh()
         train_losses.append(train_loss/train_seen)
-        train_accs.append(train_correct/train_seen)
+        for k in k_to_calc:
+            train_accs[k].append(train_correct[k]/train_seen)
 
         model.eval()
         with torch.no_grad():
-            valid_loss, valid_correct, valid_seen = 0, 0, 0
+            valid_loss, valid_correct, valid_seen = 0, defaultdict(int), 0
             valid_loader = tqdm(valid_loader, desc='validating')
             for i, data in enumerate(valid_loader):
                 inputs, labels, idxs = data
@@ -134,22 +147,23 @@ def train(args):
 
                 valid_loss += loss.item()
                 valid_seen += labels.shape[0]
-                outputs = nn.Softmax(dim=-1)(outputs) 
-                batch_preds = torch.topk(outputs, k=1)[1].squeeze(dim=-1) # TODO: include top-K accuracy
-                valid_correct += torch.sum(
-                            torch.eq(
-                                batch_preds, labels
-                            ), dim=0
-                        ).item()
+                outputs = nn.Softmax(dim=-1)(outputs)
 
-                valid_loader.set_description(f"validating: loss={valid_loss/valid_seen:.4f}, acc={valid_correct/valid_seen:.4f}")
+                for k in k_to_calc:
+                    batch_preds = torch.topk(outputs, k=k, dim=1)[1]
+                    # logging.info(f'batch_preds: {batch_preds.shape}, labels: {labels.shape}')
+                    valid_correct[k] += torch.where(batch_preds == labels.view(-1,1).expand_as(batch_preds))[0].shape[0]
+
+                valid_loader.set_description(f"validating: loss={valid_loss/valid_seen:.4f}, top-1 acc={valid_correct[1]/valid_seen:.4f}")
                 valid_loader.refresh()
 
                 # display some examples + model predictions/labels for monitoring model generalization
                 try:
                     for j in range(i * args.bs_eval, (i+1) * args.bs_eval):
                         # peek at a random sample of current batch to monitor training progress
-                        if j % (valid_size // 5) == random.randint(0, 3) or j % (valid_size // 8) == random.randint(0, 4): 
+                        if j % (valid_size // 5) == random.randint(0, 3) or j % (valid_size // 8) == random.randint(0, 4):
+                            batch_preds = torch.topk(outputs, k=1)[1].squeeze(dim=-1)
+
                             rxn_idx = random.sample(list(range(args.bs_eval)), k=1)[0]
                             rxn_true_class = labels[rxn_idx]
                             rxn_pred_class = int(batch_preds[rxn_idx].item())
@@ -166,8 +180,8 @@ def train(args):
                             rxn_true_prod = proposals_data_valid.iloc[idxs[rxn_idx].item(), 1]
                             rxn_true_prec = proposals_data_valid.iloc[idxs[rxn_idx].item(), 2]
 
-                            # apply template to get predicted precursor
-                            rxn = rdchiralReaction(rxn_pred_temp.split('>>')[-1] + '>>' + rxn_pred_temp.split('>>')[0]) # reverse template
+                            # apply template to get predicted precursor, no need to reverse bcos alr: p_temp >> r_temp
+                            rxn = rdchiralReaction(rxn_pred_temp) # rxn_pred_temp.split('>>')[-1] + '>>' + rxn_pred_temp.split('>>')[0]
                             prod = rdchiralReactants(rxn_true_prod)
                             rxn_pred_prec = rdchiralRun(rxn, prod)
 
@@ -188,16 +202,20 @@ def train(args):
                     logging.info('\nIndex out of range (last minibatch)')
 
         valid_losses.append(valid_loss/valid_seen)
-        valid_accs.append(valid_correct/valid_seen)
+        for k in k_to_calc:
+            val_accs[k].append(valid_correct[k]/valid_seen)
 
-        if args.checkpoint and valid_accs[-1] > max_valid_acc:
+        lr_scheduler.step(val_accs[1][-1])
+        logging.info(f'\nCalled a step of ReduceLROnPlateau, current LR: {optimizer.param_groups[0]["lr"]}')
+
+        if args.checkpoint and val_accs[1][-1] > max_valid_acc:
             # checkpoint model
             model_state_dict = model.state_dict()
             checkpoint_dict = {
                 "epoch": epoch,
                 "state_dict": model_state_dict, "optimizer": optimizer.state_dict(),
                 "train_accs": train_accs, "train_losses": train_losses,
-                "valid_accs": valid_accs, "valid_losses": valid_losses,
+                "valid_accs": val_accs, "valid_losses": valid_losses,
                 "max_valid_acc": max_valid_acc
             }
             checkpoint_filename = (
@@ -206,11 +224,17 @@ def train(args):
             )
             torch.save(checkpoint_dict, checkpoint_filename)
 
-        if args.early_stop and max_valid_acc - valid_accs[-1] > args.early_stop_min_delta:
+        if args.early_stop and max_valid_acc - val_accs[1][-1] > args.early_stop_min_delta:
             if args.early_stop_patience <= wait:
                 message = f"\nEarly stopped at the end of epoch: {epoch}, \
-                \ntrain loss: {train_losses[-1]:.4f}, train acc: {train_accs[-1]:.4f}, \
-                \nvalid loss: {valid_losses[-1]:.4f}, valid acc: {valid_accs[-1]:.4f} \
+                \ntrain loss: {train_losses[-1]:.4f}, train top-1 acc: {train_accs[1][-1]:.4f}, \
+                \ntrain top-2 acc: {train_accs[2][-1]:.4f}, train top-3 acc: {train_accs[3][-1]:.4f}, \
+                \ntrain top-5 acc: {train_accs[5][-1]:.4f}, train top-10 acc: {train_accs[10][-1]:.4f}, \
+                \ntrain top-20 acc: {train_accs[20][-1]:.4f}, train top-50 acc: {train_accs[50][-1]:.4f}, \
+                \nvalid loss: {valid_losses[-1]:.4f}, valid top-1 acc: {val_accs[1][-1]:.4f} \
+                \nvalid top-2 acc: {val_accs[2][-1]:.4f}, valid top-3 acc: {val_accs[3][-1]:.4f}, \
+                \nvalid top-5 acc: {val_accs[5][-1]:.4f}, valid top-10 acc: {val_accs[10][-1]:.4f}, \
+                \nvalid top-20 acc: {val_accs[20][-1]:.4f}, valid top-50 acc: {val_accs[50][-1]:.4f}, \
                 \n"
                 logging.info(message)
                 break
@@ -223,11 +247,17 @@ def train(args):
                 )
         else:
             wait = 0
-            max_valid_acc = max(max_valid_acc, valid_accs[-1])
+            max_valid_acc = max(max_valid_acc, val_accs[1][-1])
 
         message = f"\nEnd of epoch: {epoch}, \
-            \ntrain loss: {train_losses[-1]:.4f}, train top-1 acc: {train_accs[-1]:.4f}, \
-            \nvalid loss: {valid_losses[-1]:.4f}, valid top-1 acc: {valid_accs[-1]:.4f} \
+                \ntrain loss: {train_losses[-1]:.4f}, train top-1 acc: {train_accs[1][-1]:.4f}, \
+                \ntrain top-2 acc: {train_accs[2][-1]:.4f}, train top-3 acc: {train_accs[3][-1]:.4f}, \
+                \ntrain top-5 acc: {train_accs[5][-1]:.4f}, train top-10 acc: {train_accs[10][-1]:.4f}, \
+                \ntrain top-20 acc: {train_accs[20][-1]:.4f}, train top-50 acc: {train_accs[50][-1]:.4f}, \
+                \nvalid loss: {valid_losses[-1]:.4f}, valid top-1 acc: {val_accs[1][-1]:.4f} \
+                \nvalid top-2 acc: {val_accs[2][-1]:.4f}, valid top-3 acc: {val_accs[3][-1]:.4f}, \
+                \nvalid top-5 acc: {val_accs[5][-1]:.4f}, valid top-10 acc: {val_accs[10][-1]:.4f}, \
+                \nvalid top-20 acc: {val_accs[20][-1]:.4f}, valid top-50 acc: {val_accs[50][-1]:.4f}, \
             \n"
         logging.info(message)
 
@@ -260,10 +290,12 @@ def test(model, args):
         DATA_FOLDER / f"{args.csv_prefix}_test.csv", 
         index_col=None, dtype='str'
     )
+    k_to_calc = [1, 2, 3, 5, 10, 20, 50]
 
     model.eval()
     with torch.no_grad():
-        test_loss, test_correct, test_seen = 0, 0, 0
+        test_accs = defaultdict(int)
+        test_loss, test_correct, test_seen = 0, defaultdict(int), 0
         test_loader = tqdm(test_loader, desc='testing')
         for i, data in enumerate(test_loader):
             inputs, labels, idxs = data
@@ -274,22 +306,22 @@ def test(model, args):
 
             test_loss += loss.item()
             test_seen += labels.shape[0]
-            outputs = nn.Softmax(dim=-1)(outputs) 
-            batch_preds = torch.topk(outputs, k=1)[1].squeeze(dim=-1) # TODO: include top-K accuracy
-            test_correct += torch.sum(
-                            torch.eq(
-                                batch_preds, labels
-                            ), dim=0
-                        ).item()
+            outputs = nn.Softmax(dim=-1)(outputs)
 
-            test_loader.set_description(f"testing: loss={test_loss/test_seen:.4f}, acc={test_correct/test_seen:.4f}")
+            for k in k_to_calc:
+                batch_preds = torch.topk(outputs, k=k, dim=1)[1]
+                test_correct[k] += torch.where(batch_preds == labels.view(-1,1).expand_as(batch_preds))[0].shape[0]
+
+            test_loader.set_description(f"testing: loss={test_loss/test_seen:.4f}, top-1 acc={test_correct[1]/test_seen:.4f}")
             test_loader.refresh()
 
             # display some examples + model predictions/labels for monitoring model generalization
             try:
                 for j in range(i * args.bs_eval, (i+1) * args.bs_eval):
                     # peek at a random sample of current batch to monitor training progress
-                    if j % (test_size // 5) == random.randint(0, 3) or j % (test_size // 8) == random.randint(0, 4): 
+                    if j % (test_size // 5) == random.randint(0, 3) or j % (test_size // 8) == random.randint(0, 4):
+                        batch_preds = torch.topk(outputs, k=1)[1].squeeze(dim=-1)
+
                         rxn_idx = random.sample(list(range(args.bs_eval)), k=1)[0]
                         rxn_true_class = labels[rxn_idx]
                         rxn_pred_class = int(batch_preds[rxn_idx].item())
@@ -307,7 +339,7 @@ def test(model, args):
                         rxn_true_prec = proposals_data_test.iloc[idxs[rxn_idx].item(), 2]
 
                         # apply template to get predicted precursor
-                        rxn = rdchiralReaction(rxn_pred_temp.split('>>')[-1] + '>>' + rxn_pred_temp.split('>>')[0]) # reverse template
+                        rxn = rdchiralReaction(rxn_pred_temp)
                         prod = rdchiralReactants(rxn_true_prod)
                         rxn_pred_prec = rdchiralRun(rxn, prod)
 
@@ -328,7 +360,11 @@ def test(model, args):
                 logging.info('\nIndex out of range (last minibatch)')
 
     message = f" \
-    \ntest loss: {test_loss/test_seen:.4f}, test top-1 acc: {test_correct/test_seen:.4f}"
+    \ntest loss: {test_loss/test_seen:.4f}, test top-1 acc: {test_correct[1]/test_seen:.4f} \
+    \nvtest top-2 acc: {test_correct[2]/test_seen:.4f}, test top-3 acc: {test_correct[3]/test_seen:.4f}, \
+    \ntest top-5 acc: {test_correct[5]/test_seen:.4f}, test top-10 acc: {test_correct[10]/test_seen:.4f}, \
+    \ntest top-20 acc: {test_correct[20]/test_seen:.4f}, test top-50 acc: {test_correct[50]/test_seen:.4f}, \
+    \n"
     logging.info(message)
     logging.info('Finished Testing')
 
@@ -367,6 +403,13 @@ def parse_args():
                         type=int, default=2)
     parser.add_argument("--early_stop_min_delta",
                         help="min. improvement in criteria needed to not early stop", type=float, default=1e-4)
+    parser.add_argument("--lr_scheduler_factor",
+                        help="factor by which to reduce LR (ReduceLROnPlateau)", type=float, default=0.3)
+    parser.add_argument("--lr_scheduler_patience",
+                        help="num. of epochs with no improvement after which to reduce LR (ReduceLROnPlateau)",
+                        type=int, default=1)
+    parser.add_argument("--lr_cooldown", help="epochs to wait before resuming normal operation (ReduceLROnPlateau)",
+                        type=int, default=0)
     # model params
     parser.add_argument("--hidden_size", help="hidden size", type=int, default=512)
     parser.add_argument("--depth", help="depth", type=int, default=5)

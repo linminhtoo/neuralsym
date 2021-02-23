@@ -5,7 +5,7 @@ conda activate neuralsym
 # higher bs --> faster training (using CPU)
 # 8 sec/epoch on 1 GPU lmao
 python train.py \
-    --expt_name 'depth0_hdm100_lr1e3_ep30_bs300_stop2_var32681' \
+    --expt_name 'depth0_hdm120_lr1e3_ep30_bs300_stop2_fac30_pat1_var32681' \
     --do_train \
     --do_test \
     --prodfps_prefix 50k_1000000dim_2rad_to_32681_prod_fps \
@@ -19,7 +19,9 @@ python train.py \
     --early_stop \
     --early_stop_patience 2 \
     --depth 0 \
-    --hidden_size 100
+    --hidden_size 120 \
+    --lr_scheduler_factor 0.3 \
+    --lr_scheduler_patience 1
 
     # --checkpoint \
     # don't checkpoint first as model is very big, 600M

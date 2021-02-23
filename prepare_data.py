@@ -179,14 +179,15 @@ def get_train_templates(args):
         idx, template = result
         if 'reaction_smarts' not in template:
             invalid_temp += 1
+            logging.info(f'At {idx}, could not extract template')
             continue # no template could be extracted
 
-        # DO NOT CANO FOR NOW
-        # canonicalize template (needed, bcos q a number of templates are duplicates I think, 10247 --> 10150)
-        # p_temp = cano_smarts(template['products']) # reaction_smarts
-        # r_temp = cano_smarts(template['reactants'])
-        # cano_temp = r_temp + '>>' + p_temp
-        cano_temp = template['reaction_smarts']
+        # canonicalize template (needed, bcos q a number of templates are equivalent, 10247 --> 10150)
+        p_temp = cano_smarts(template['products']) # reaction_smarts
+        r_temp = cano_smarts(template['reactants'])
+        cano_temp = p_temp + '>>' + r_temp
+        # cano_temp = template['reaction_smarts'] # if not canonicalizing
+        # NOTE: 'reaction_smarts' is actually: p_temp >> r_temp !!!!! 
 
         if cano_temp not in templates:
             templates[cano_temp] = 1
@@ -201,14 +202,18 @@ def get_train_templates(args):
         f.writelines(templates)
 
 def get_template_idx(temps_dict, task):
-    # rxn_idx, r, p = task
+    rxn_idx, r, p = task
 
-    # seems to work, but fails to recover a lot of templates even in training set, not sure why
+    ############################################################
     # apply each template in database to product, & see if we recover ground truth
+    # seems to work, but fails to recover a lot of templates even in training set
+    # bcos chirality handling is not perfect! (connor) 
+    # so, I guess we can try this first, then fall back to dict if it fails
+    
     # prod = rdchiralReactants(p)
-    # for temp_idx, pattern in enumerate(temps_dict):
-    #     # reverse template, but apparently dunnid # pattern.split('>>')[-1] + '>>' + pattern.split('>>')[0]
-    #     rxn = rdchiralReaction(pattern)
+    # for pattern in temps_dict:
+    #     # reverse template, why sometimes didnt need?
+    #     rxn = rdchiralReaction(pattern.split('>>')[-1] + '>>' + pattern.split('>>')[0])
     #     try:
     #         pred_prec = rdchiralRun(rxn, prod)
     #     except:
@@ -216,30 +221,46 @@ def get_template_idx(temps_dict, task):
 
     #     if pred_prec:
     #         if r in pred_prec:
-    #             return rxn_idx, temp_idx
+    #             return rxn_idx, temps_dict[pattern]
     #         # canonicalize precursor
     #         cano_prec = []
     #         for prec in pred_prec:
     #             try:
-    #                 cano_prec.append(Chem.MolToSmiles(Chem.MolFromSmiles(prec)))
+    #                 prec_ = Chem.MolToSmiles(Chem.MolFromSmiles(prec))
+    #                 cano_prec.append(prec_)
     #             except:
-    #                 pass
+    #                 cano_prec.append(prec)
     #         if r in cano_prec:
-    #             return rxn_idx, temp_idx # template_idx == label
+    #             return rxn_idx, temps_dict[pattern] # template_idx == label
+    # now, extract template & match to temps_dict
+    # task = rxn_idx, r_map, p_map
+    # rxn_idx, rxn_template = get_tpl(task)
+
+    # if 'reaction_smarts' not in rxn_template:
+    #     return rxn_idx, -1 # unable to extract template
+    # p_temp = cano_smarts(rxn_template['products'])
+    # r_temp = cano_smarts(rxn_template['reactants'])
+    # cano_temp = p_temp + '>>' + r_temp
+    # # cano_temp = rxn_template['reaction_smarts'] # note reaction_smarts is p_temp >> r_temp
+
+    # if cano_temp in temps_dict:
+    #     return rxn_idx, temps_dict[cano_temp]
+    # else:
+    #     return rxn_idx, len(temps_dict) # no template matching
     # return rxn_idx, len(temps_dict) # no template matching
     
     ############################################################
     # original label generation pipeline
     # extract template for this rxn_smi, and match it to template dictionary from training data
-    # rxn = (rxn_idx, r, p)
+    rxn = (rxn_idx, r, p) # r & p must be atom-mapped
     rxn_idx, rxn_template = get_tpl(task)
 
     if 'reaction_smarts' not in rxn_template:
         return rxn_idx, -1 # unable to extract template
-    # p_temp = cano_smarts(rxn_template['products'])
-    # r_temp = cano_smarts(rxn_template['reactants'])
-    # cano_temp = r_temp + '>>' + p_temp
-    cano_temp = rxn_template['reaction_smarts']
+    p_temp = cano_smarts(rxn_template['products'])
+    r_temp = cano_smarts(rxn_template['reactants'])
+    cano_temp = p_temp + '>>' + r_temp
+    # cano_temp = rxn_template['reaction_smarts'] # note reaction_smarts is p_temp >> r_temp
 
     if cano_temp in temps_dict:
         return rxn_idx, temps_dict[cano_temp]
@@ -312,7 +333,7 @@ def match_templates(args):
             rows.append([
                 rxn_idx,
                 phase_prod_smi_nomap[rxn_idx],
-                rcts_smi_nomap, # tasks[rxn_idx][1]
+                rcts_smi_nomap, # tasks[rxn_idx][1],
                 template, 
                 template_idx,
             ])
