@@ -35,7 +35,23 @@ true precursor (score = +0.9820):   COc1ccc(I)c(O)c1.ClCC1CO1
 ```
 
 ## Inference
-This is a work in progress in ```inference.py```. For my own project, I am first working on generating up to top-200 precursors across the entire train/valid/test datasets. But I will also work on a simple API that accepts a list of product SMILES and outputs a list of top-K dictionaries containing precursors & corresponding probabilities assigned by the model.
+For my own purposes, I am first working on generating up to top-200 precursors across the entire train/valid/test datasets. This is in ```infer_all.py```.
+
+But I have also done a simple API in ```infer_one.py``` that accepts a list of product SMILES and outputs a dictionary of top-K precursors & corresponding probabilities assigned by the model. This is just a sample to demonstrate the functionality - feel free to adapt as you wish!
+
+Example:
+```
+{'COC(=O)c1cccc2[nH]c(NCC3CCNCC3)nc12': 
+    [
+        (['COC(=O)c1cccc2[nH]c(NCC3CCN(C(=O)OC(C)(C)C)CC3)nc12'], 0.9992377758026123), 
+        (['COC(=O)c1cccc2[nH]c(NCC3CCN(C(=O)OCc4ccccc4)CC3)nc12'], 0.0002514408261049539), 
+        (['COC(=O)c1cccc2[nH]c(NCC3CCN(C(=O)C(F)(F)F)CC3)nc12'], 0.00024452427169308066), 
+        (['COC(=O)c1cccc2[nH]c(NCC3CCN(Cc4ccccc4)CC3)nc12'], 0.00012763732229359448), 
+        (['COC(=O)c1cccc2[nH]c(NCc3ccncc3)nc12'], 4.4018081098329276e-05)
+    ]}
+```
+
+Next in the pipeline: build a sample webapp that allows user to draw molecules & feed it into the infer_one API, followed by visualization of the proposed reactants & their probabilities.
 
 ## Requirements & Setup instructions
 RDKit, RDChiral & PyTorch are the main packages.

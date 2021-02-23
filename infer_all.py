@@ -31,16 +31,7 @@ from dataset import FingerprintDataset
 DATA_FOLDER = Path(__file__).resolve().parent / 'data'
 CHECKPOINT_FOLDER = Path(__file__).resolve().parent / 'checkpoint'
 
-def seed_everything(seed: Optional[int] = 0) -> None:
-    torch.manual_seed(seed)
-    random.seed(seed)
-    os.environ["PYTHONHASHSEED"] = str(seed)
-    np.random.seed(seed)
-
-    logging.info(f"Using seed: {seed}\n")
-
 def infer_all(args):
-    seed_everything(args.random_seed)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     logging.info(f'Loading templates from file: {args.templates_file}')
@@ -166,26 +157,49 @@ def compile_into_csv(args):
         pool = multiprocessing.Pool(num_cores)
 
         gen_precs_partial = partial(gen_precs, templates_filtered, preds, phase_topk)
-        for i, result in enumerate(tqdm(pool.imap(gen_precs_partial, tasks), 
-                            total=len(clean_rxnsmi_phase), desc='Generating predicted reactants')):
-            precursors, seen, this_dup = result
-            dup_count += this_dup
+        if phase != 'train':
+            for i, result in enumerate(tqdm(pool.imap(gen_precs_partial, tasks), 
+                                total=len(clean_rxnsmi_phase), desc='Generating predicted reactants')):
+                precursors, seen, this_dup = result
+                dup_count += this_dup
 
-            prod_smi = clean_rxnsmi_phase[i].split('>>')[-1]
-            prod_smiles_mapped_phase.append(prod_smi)
+                prod_smi = clean_rxnsmi_phase[i].split('>>')[-1]
+                prod_smiles_mapped_phase.append(prod_smi)
+                
+                prod_smi_nomap = proposals_data.iloc[i, 1]
+                prod_smiles_phase.append(prod_smi_nomap)
+
+                rcts_smi_nomap = proposals_data.iloc[i, 2]
+                rcts_smiles_phase.append(rcts_smi_nomap)
+
+                proposals_phase[prod_smi] = seen
+                proposed_precs_phase.append(seen)
+                proposed_precs_phase_withdups.append(precursors)
+
+            with open(DATA_FOLDER / f'precs_{phase}.pickle', 'wb') as f:
+                pickle.dump(proposed_precs_phase_withdups, f)
+            with open(DATA_FOLDER / f'seen_{phase}.pickle', 'wb') as f:
+                pickle.dump(proposed_precs_phase, f)
             
-            prod_smi_nomap = proposals_data.iloc[i, 1]
-            prod_smiles_phase.append(prod_smi_nomap)
+            dup_count /= len(clean_rxnsmi_phase)
+            logging.info(f'Avg # dups per product: {dup_count}')
+        else:
+            with open(DATA_FOLDER / f'precs_{phase}.pickle', 'rb') as f:
+                proposed_precs_phase_withdups = pickle.load(f)
+            with open(DATA_FOLDER / f'seen_{phase}.pickle', 'rb') as f:
+                proposed_precs_phase = pickle.load(f)
+            
+            for i in range(len(clean_rxnsmi_phase)):
+                prod_smi = clean_rxnsmi_phase[i].split('>>')[-1]
+                prod_smiles_mapped_phase.append(prod_smi)
+                
+                prod_smi_nomap = proposals_data.iloc[i, 1]
+                prod_smiles_phase.append(prod_smi_nomap)
 
-            rcts_smi_nomap = proposals_data.iloc[i, 2]
-            rcts_smiles_phase.append(rcts_smi_nomap)
+                rcts_smi_nomap = proposals_data.iloc[i, 2]
+                rcts_smiles_phase.append(rcts_smi_nomap)
 
-            proposals_phase[prod_smi] = seen
-            proposed_precs_phase.append(seen)
-            proposed_precs_phase_withdups.append(precursors)
-
-        dup_count /= len(clean_rxnsmi_phase)
-        logging.info(f'Avg # dups per product: {dup_count}')
+                proposals_phase[prod_smi] = proposed_precs_phase[i]
 
         # match predictions to true_precursors & get rank
         logging.info('\nCalculating ranks before removing duplicates')
@@ -254,7 +268,7 @@ def compile_into_csv(args):
 
         phase_dataframe.to_csv(
             DATA_FOLDER / 
-            f'neuralsym_{topk}topk_{maxk}maxk_noGT_{phase}.csv',
+            f'neuralsym_{args.topk}topk_{args.maxk}maxk_noGT_{phase}.csv',
             index=False
         )
         logging.info(f'Saved proposals of {phase} as CSV!')
@@ -369,7 +383,6 @@ def parse_args():
     parser.add_argument("--min_freq", help="Min freq of template", type=int, default=1)
     parser.add_argument("--radius", help="Fingerprint radius", type=int, default=2)
     parser.add_argument("--fp_size", help="Fingerprint size", type=int, default=32681)
-    parser.add_argument("--random_seed", help="random seed", type=int, default=0)
     parser.add_argument("--bs", help="batch size", type=int, default=500)
     parser.add_argument("--topk", help="How many top-k proposals to put in train (not guaranteed)", 
                         type=int, default=200)

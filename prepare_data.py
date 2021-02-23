@@ -117,6 +117,10 @@ def variance_cutoff(args):
             indices_ordered = list(range(logged.shape[0])) # should be 1,000,000
             indices_ordered.sort(key=lambda x: vars[x], reverse=True)
 
+        # need to save sorted indices for infer_one API
+        indices_np = np.array(indices_ordered[:args.final_fp_size])
+        np.savetxt(args.data_folder / 'variance_indices.txt', indices_np)
+
         logged = logged.transpose() # [1 mil, 39713] -> [39713, 1 mil]
         # build and save final thresholded fingerprints
         thresholded = []
@@ -129,6 +133,7 @@ def variance_cutoff(args):
             args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_prod_fps_{phase}.npz",
             thresholded
         )
+        
 
 def get_tpl(task):
     idx, react, prod = task
@@ -404,9 +409,9 @@ if __name__ == '__main__':
         gen_prod_fps(args)
     if not (args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_prod_fps_valid.npz").exists():
         # for training dataset (40k rxn_smi):
-        # ~2 min to do log(x+1) transformation on 8 cores, and then
-        # ~2 min to gather variance statistics across 1 million indices on 8 cores, and then
-        # ~6 min to build final 32681-dim fingerprint on 8 cores
+        # ~1 min to do log(x+1) transformation on 16 cores, and then
+        # ~2 min to gather variance statistics across 1 million indices on 16 cores, and then
+        # ~5 min to build final 32681-dim fingerprint on 16 cores
         variance_cutoff(args)
 
     args.output_file_prefix = f'{args.output_file_prefix}_to_{args.final_fp_size}'
