@@ -463,11 +463,23 @@ if __name__ == '__main__':
     if args.csv_prefix is None:
         args.csv_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_csv'
 
-    logging.info(f'{args}')
+    logging.info(args)
     if args.do_train:
         model = train(args)
     else:
         # load model from saved checkpoint
-        raise NotImplementedError
+        checkpoint = torch.load(
+            CHECKPOINT_FOLDER / f"{args.expt_name}.pth.tar",
+            map_location=device,
+        )
+        model = TemplateNN(
+            output_size=len(templates_filtered)+1,
+            size=args.hidden_size,
+            num_layers_body=args.depth,
+            input_size=args.fp_size
+        )
+        model.load_state_dict(checkpoint["state_dict"])
+        model.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+
     if args.do_test:
         test(model, args)

@@ -403,10 +403,13 @@ if __name__ == '__main__':
         # ~2 min on 40k train prod_smi on 16 cores for 32681-dim
         gen_prod_fps(args)
     if not (args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_prod_fps_valid.npz").exists():
+        # for training dataset (40k rxn_smi):
+        # ~2 min to do log(x+1) transformation on 8 cores, and then
+        # ~2 min to gather variance statistics across 1 million indices on 8 cores, and then
+        # ~6 min to build final 32681-dim fingerprint on 8 cores
         variance_cutoff(args)
 
     args.output_file_prefix = f'{args.output_file_prefix}_to_{args.final_fp_size}'
-
     if not (args.data_folder / args.templates_file).exists():
         # ~40 sec on 40k train rxn_smi on 16 cores
         get_train_templates(args)
