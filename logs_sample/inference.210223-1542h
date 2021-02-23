@@ -1,0 +1,251 @@
+Namespace(bs=500, csv_prefix='50k_1000000dim_2rad_to_32681_csv', depth=0, expt_name=None, fp_size=32681, hidden_size=300, labels_prefix='50k_1000000dim_2rad_to_32681_labels', log_file='inference', maxk=200, min_freq=1, phases=['train', 'valid', 'test'], prodfps_prefix='50k_1000000dim_2rad_to_32681_prod_fps', radius=2, rxn_smi_prefix='50k_clean_rxnsmi_noreagent_allmapped_canon', templates_file='50k_training_templates', topk=200)
+Loading templates from file: 50k_training_templates
+Total number of template patterns: 10198
+Parallelizing over 120 cores
+
+Calculating ranks before removing duplicates
+
+
+Train Top-1 accuracy:  94.201%
+Train Top-3 accuracy:  98.494%
+Train Top-5 accuracy:  98.645%
+Train Top-10 accuracy:  98.693%
+Train Top-20 accuracy:  98.698%
+Train Top-50 accuracy:  98.698%
+Train Top-100 accuracy:  98.698%
+Train Top-200 accuracy:  98.698%
+
+
+
+Calculating ranks after removing duplicates
+
+
+Train Top-1 accuracy:  94.201%
+Train Top-3 accuracy:  98.494%
+Train Top-5 accuracy:  98.648%
+Train Top-10 accuracy:  98.693%
+Train Top-20 accuracy:  98.698%
+Train Top-50 accuracy:  98.698%
+Train Top-100 accuracy:  98.698%
+Train Top-200 accuracy:  98.698%
+
+
+
+(For training only) Double checking accuracy after removing ground truth predictions
+
+
+Train Top-1 accuracy:  0.000%
+Train Top-3 accuracy:  0.000%
+Train Top-5 accuracy:  0.000%
+Train Top-10 accuracy:  0.000%
+Train Top-20 accuracy:  0.000%
+Train Top-50 accuracy:  0.000%
+Train Top-100 accuracy:  0.000%
+Train Top-200 accuracy:  0.000%
+
+
+Average precursors proposed per prod_smi (dups removed): 28.496462115680004
+Min precursors: 1 for Fc1cc(Cl)c(F)nc1F
+Max precursors: 251 for c1ccc(-c2c3ccccc3c(-c3ccccc3)c3cc(-c4ccc(-c5ccc6c(c5)nc(-c5ccccc5)n6-c5ccccc5)cc4)ccc23)cc1)
+
+Most common 20:
+('c1ccc(-c2c3ccccc3c(-c3ccccc3)c3cc(-c4ccc(-c5ccc6c(c5)nc(-c5ccccc5)n6-c5ccccc5)cc4)ccc23)cc1', 251)
+('c1ccc2c(-c3c4ccccc4c(-c4ccc5ccc(-c6ccc7c8ccccc8c8ccccc8c7c6)cc5c4)c4ccccc34)cccc2c1', 250)
+('CCCCCCCCCCCCCCCCCCN(C(=O)CCCCCCCCCCCCCCCCC)C1O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O', 234)
+('Brc1cccc(-c2cccc(-c3cc(-c4ccccc4)cc4c3sc3ccc(-c5ccccc5)cc34)c2)c1', 226)
+('CCCCCCCCCCCCCCCCCCCCOC(=O)OC[C@@H](CO)OC(=O)OCCCCCCCCCCCCCCCCCCCC', 222)
+('c1ccc(-c2ccc(Nc3ccc(-c4ccccc4)cc3-c3ccccc3)cc2)cc1', 216)
+('c1ccc(Oc2cccc(Oc3cccc(-c4cccc(Oc5ccccc5Oc5ccccc5)c4)c3)c2)cc1', 193)
+('CC(=O)c1ccc(-c2ccccc2-c2cccc(-c3cc(C(C)(C)S(C)(=O)=O)cc4cccnc34)c2)cc1', 175)
+('CCCCCCCCCCCCCCCCOC(CSC)C(O)CCCCCCCCCCCCCCCC', 161)
+('CC(C)(C)OC(=O)NCCC[C@@H](CNC(=O)[C@H](CCCNC(=O)OC(C)(C)C)NC(=O)[C@@H]1Cc2cccc(c2)-c2ccc(O)c(c2)C[C@H](NC(=O)OC(C)(C)C)C(=O)N[C@@H](CCCNC(=O)OC(C)(C)C)C(=O)N1)NC(=O)OC(C)(C)C', 155)
+('C=CCCCCCCCCOC(=O)CCCCCCC/C=C\\CCCCCCCC', 155)
+('CCCCCCCCCCCCCCCCCCOCC(O)COP(=O)([O-])OCCCCCCCCCC[N+](C)(C)C', 147)
+('CC1(C)c2ccccc2-c2ccc(N(c3ccc(Br)cc3)c3ccc(-c4ccccc4)cc3)cc21', 146)
+('CCCCCCCCCCCCCCCCCCCCC(=O)Nc1ccn([C@@H]2O[C@H](CO)[C@@H](O)[C@@H]2O)c(=O)n1', 145)
+('CCCc1cc(-c2ccc(O)cc2)c(-c2ccccc2)c(-c2cn[nH]c2)c1', 145)
+('CCCCCCCCCCCCCCCCOCC(O)COP(=O)([O-])OC=C1CCCC[N+]1(C)C', 144)
+('CCCCCCCCCCCCCCCC(=O)OCC(CSCCC(=O)O)OC(=O)CCCCCCCCCCCCCCC', 141)
+('O=c1[nH]c2ccn(-c3ccc(-c4ccccc4O)cc3)c2c(O)c1-c1ccccc1', 140)
+('Brc1ccc(-c2ccc3cc(-c4cccc5ccccc45)ccc3c2)cc1', 137)
+('c1ccc(Oc2ccc(-c3cccc4ccccc34)c(Oc3ccccc3)c2)cc1', 136)
+
+Least common 20:
+('ON=Cc1c(F)ccc(Cl)c1C(F)(F)F', 1)
+('O=S(=O)(O)C(F)(F)C(F)(F)C(F)(F)C(F)(F)F', 1)
+('N=C(N)NN=Cc1ccc(F)cc1F', 1)
+('CC(C)=CC(=O)NC(=S)N(C)C', 1)
+('CCOP(=O)(OC=C(Cl)C=C(Cl)Cl)OCC', 1)
+('CSc1nc(Cl)c2c(n1)CCC2', 1)
+('CS(=O)(=O)OCc1cc(Br)ccc1Cl', 1)
+('COc1ccc(C2=NN(C3CCN(S(=O)(=O)c4ccc(Cl)cc4)CC3)C(=O)C2(C)C)cc1OC', 1)
+('Cc1nn(C)c2c1C(c1ccc(Cl)cc1Cl)SC(C)(C)CN2C=O', 1)
+('CON(C)c1nc(Cl)nc(Cl)n1', 1)
+('CCCS(=O)(=O)Nc1ccc(F)c([N+](=O)[O-])c1', 1)
+('O=C1CC(Nc2cc([N+](=O)[O-])ccc2Cl)=NN1c1c(Cl)cc(Cl)cc1Cl', 1)
+('CCOP(C)(=O)COS(=O)(=O)c1ccccc1C(F)(F)F', 1)
+('Cc1cc(C)cc(C=NO)c1', 1)
+('CC(C)C[C@H]1C[C@H]2CSC(NC(=O)c3ccccc3)=N[C@@]2(c2ccc(F)cc2F)CO1', 1)
+('CC(=N[S@](=O)C(C)(C)C)c1cccc(Br)c1', 1)
+('N=C(NCc1ccco1)NN=Cc1c(Cl)cccc1Cl', 1)
+('O=[N+]([O-])c1cc(C=NO)ccc1F', 1)
+('Cc1cc(C=NCC2CC2)ccn1', 1)
+('CC(C)=CCn1cccc1/C=C(\\C#N)c1ccc(Cl)cc1', 1)
+Zipped all info for each rxn_smi into a list for dataframe creation!
+Saved proposals of train as CSV!
+Parallelizing over 120 cores
+
+Calculating ranks before removing duplicates
+
+
+Valid Top-1 accuracy:  46.482%
+Valid Top-3 accuracy:  66.867%
+Valid Top-5 accuracy:  74.143%
+Valid Top-10 accuracy:  81.239%
+Valid Top-20 accuracy:  85.648%
+Valid Top-50 accuracy:  87.673%
+Valid Top-100 accuracy:  87.833%
+Valid Top-200 accuracy:  87.853%
+
+
+
+Calculating ranks after removing duplicates
+
+
+Valid Top-1 accuracy:  46.482%
+Valid Top-3 accuracy:  67.549%
+Valid Top-5 accuracy:  75.185%
+Valid Top-10 accuracy:  82.281%
+Valid Top-20 accuracy:  86.350%
+Valid Top-50 accuracy:  87.733%
+Valid Top-100 accuracy:  87.853%
+Valid Top-200 accuracy:  87.853%
+
+
+Average precursors proposed per prod_smi (dups removed): 28.493485668470637
+Min precursors: 0 for Fc1ccc(C2=Nn3c(Cl)nnc3CC2)cc1
+Max precursors: 273 for CC1(C)c2ccccc2-c2ccc(N(c3ccc(-c4ccccc4)cc3)c3ccc(-c4ccc5[nH]c6cc7c(cc6c5c4)-c4ccccc4C7(C)C)cc3)cc21)
+
+Most common 20:
+('CC1(C)c2ccccc2-c2ccc(N(c3ccc(-c4ccccc4)cc3)c3ccc(-c4ccc5[nH]c6cc7c(cc6c5c4)-c4ccccc4C7(C)C)cc3)cc21', 273)
+('CC(C)[C@H](NC(=O)CNC(=O)[C@@H]1CCCN1C(=O)[C@@H](NC(=O)CNC(=O)[C@@H](NC(=O)CNC(=O)[C@@H]1CCCN1C(=O)[C@@H](NC(=O)OCc1ccccc1)C(C)C)C(C)C)C(C)C)C(=O)NCC(=O)O', 180)
+('CNCCN(CCOC)CCOCCOCCOCCOCCOCCOCCOC', 165)
+('Brc1cccc(-c2ccc3c4c(cccc24)-c2ccccc2-3)c1', 156)
+('c1ccc(-c2ccc(Nc3ccccc3-c3ccccc3)cc2)cc1', 150)
+('Nc1ncc(-c2ccc(-c3ccccc3S(=O)(=O)Cc3nc4ccccc4c(=O)[nH]3)cc2F)cn1', 119)
+('CCN(CCCN1CCCC1=O)Cc1cccc(OC)c1-c1cccc(CC(=O)OC)c1', 118)
+('Nc1ccc(-c2cccc(-c3cc(-c4ccc(C(F)(F)F)cc4)cc(C(F)(F)F)n3)c2)cn1', 115)
+('CC(C)(C)OC(=O)NC1(c2ccc(-c3nc4c5cc(-c6cccc(C#N)c6)ccc5nn4cc3-c3ccccc3)cc2)CCC1', 114)
+('O=C(O)CC1(c2ccc(-c3ccc(-c4ccncc4C(O)CCCc4ccccc4)cc3)cc2)CC1', 112)
+('CCOC(=O)C1(c2ccc(-c3ccc(-c4onc(C)c4Nc4cccc(-c5cccnc5)c4)cc3)cc2)CC1', 108)
+('O=C(O)COCCOCCOCCOCCOCCOCCOCC(F)(F)F', 107)
+('OC[C@H](O)[C@@H](O)[C@H](O)[C@H](O)CO', 107)
+('C[C@@H]1CN([C@H](CO)CCN2CCC3(CC3)[C@H](O)C2)C(=O)CCN1c1ccc(Cl)c(Cl)c1', 107)
+('O=Cc1ccc(-c2cnc3c(-c4ccccc4)cnn3c2)cc1', 106)
+('CCCCCCCC/C=C\\CCCCCCCCN1CC(C(=O)O)CC1=O', 106)
+('CCN(CC)c1ccc(-c2cc(-c3ccc(C(=O)O)cc3)ccc2OCCCCNC(C)C)cc1C(C)(C)C', 105)
+('CC(O)CNC[C@H](O)[C@@H](O)[C@H](O)[C@H](O)CO', 102)
+('CCCCCCCCCCCCCCOCCOCCO', 101)
+('O=C(c1ccc(S(=O)(=O)Nc2ccccc2Oc2ccc(Cl)c(Cl)c2)cc1)N1CCN(CCCN2CCOCC2)CC1', 101)
+
+Least common 20:
+('CCCCN(CC(=O)OC(C)(C)C)[C@H]1CC[C@H](NC(=O)c2cc3cc(C(=N)NC(=O)OCc4ccccc4)ccc3o2)CC1', 2)
+('CCCSP(=O)(OCC)Oc1cccc(C=NNC(=O)c2ccccc2)c1', 2)
+('O=C(c1ccco1)N1N=C(c2ccccc2)Nc2cnccc21', 2)
+('CC(C)(C)OC(=O)On1nnc2ccc(Cl)cc21', 2)
+('CCCC[Sn](CCCC)(CCCC)c1cnc(C)s1', 2)
+('C=CCC(CC=C)CO[SiH2]c1ccc([Sn](C)(C)C)cc1', 2)
+('Cc1nc(Cn2c(=O)sc3cc(F)ccc32)no1', 1)
+('CC(C)(C)[S@@](=O)/N=C(\\c1ccc(OC(F)(F)F)c(F)c1)c1ncccc1Br', 1)
+('FC(F)(F)C(OCOC(C(F)(F)F)C(F)(F)F)C(F)(F)F', 1)
+('Cc1ccnc2c1C(=NNC(=N)NO)CC(c1ccco1)C2', 1)
+('N#CC(N)=C(C#N)N=Cc1c(Cl)cc(C(F)(F)F)cc1Cl', 1)
+('Clc1cc(Cl)c(Cl)nc1Cl', 1)
+('CCC(C)OC(C)CC', 1)
+('CCCC(=O)N(NC(N)=S)c1ccccc1', 1)
+('CC(C)(C)OCC(F)(F)F', 1)
+('CCCC[Sn](CCCC)(CCCC)c1nnn(C)n1', 1)
+('Cn1nc(Br)c2cc(F)c(F)cc21', 1)
+('CC[C@H](/C=C/C#CC[C@H](/C=C/C=C/C#C[C@H](CCCC(=O)OC)O[Si](C)(C)C(C)(C)C)O[Si](C)(C)C(C)(C)C)O[Si](C)(C)C(C)(C)C', 1)
+('Fc1ccc(C2=Nn3c(Cl)nnc3CC2)cc1', 0)
+('C=C(CCCCC)C(=O)c1cccnc1', 0)
+Zipped all info for each rxn_smi into a list for dataframe creation!
+Saved proposals of valid as CSV!
+Parallelizing over 120 cores
+
+Calculating ranks before removing duplicates
+
+
+Test Top-1 accuracy:  45.514%
+Test Top-3 accuracy:  66.274%
+Test Top-5 accuracy:  73.227%
+Test Top-10 accuracy:  80.519%
+Test Top-20 accuracy:  85.155%
+Test Top-50 accuracy:  87.353%
+Test Top-100 accuracy:  87.592%
+Test Top-200 accuracy:  87.592%
+
+
+
+Calculating ranks after removing duplicates
+
+
+Test Top-1 accuracy:  45.514%
+Test Top-3 accuracy:  66.913%
+Test Top-5 accuracy:  74.146%
+Test Top-10 accuracy:  81.618%
+Test Top-20 accuracy:  85.834%
+Test Top-50 accuracy:  87.512%
+Test Top-100 accuracy:  87.592%
+Test Top-200 accuracy:  87.592%
+
+
+Average precursors proposed per prod_smi (dups removed): 28.42997002997003
+Min precursors: 0 for C=CCC1=C(c2cccc3ccc(Cl)cc23)N2CCN=C2S1
+Max precursors: 250 for CCCCCCCCC=CCCCCCCCCOCC(C[N+](C)(C)CCCCC(=O)OCCC(=O)CCC(=O)CCO)OCCCCCCCCC=CCCCCCCCC)
+
+Most common 20:
+('CCCCCCCCC=CCCCCCCCCOCC(C[N+](C)(C)CCCCC(=O)OCCC(=O)CCC(=O)CCO)OCCCCCCCCC=CCCCCCCCC', 250)
+('C=C(CCCCCCCCCCCCCCCC)CC(CO)COCCCCCCCCCCCCCCCC', 202)
+('CCCCCCCCCCCCCCCC(=O)OCC(C[N+](C)(C)CCCCCCCCCCCCCCCCCCCCO)OC(=O)CCCCCCCCCCCCCCC', 173)
+('c1ccc(N(c2ccc(-c3ccc(-c4ccc(Nc5ccc(-c6ccc(-c7ccc(N(c8ccccc8)c8cccc9ccccc89)cc7)cc6)cc5)cc4)cc3)cc2)c2cccc3ccccc23)cc1', 167)
+('CCCCCCCCCCCCCCCCCCCCCCOc1ccc(CO)c(OCCCCCCCCCCCCCCCCCCCCCC)c1', 154)
+('C=COCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOC', 154)
+('COCCOCCOCCOCCOCCOCCOCCOCCOCCO', 147)
+('Nc1ccc(-c2c3nc(c(-c4cccnc4)c4ccc([nH]4)c(-c4cccnc4)c4nc(c(-c5cccnc5)c5ccc2[nH]5)C=C4)C=C3)cc1', 143)
+('Oc1ccc2cc(-c3ccccc3Nc3ccc(OCCN4CCCCC4)c(F)c3)ccc2c1', 131)
+('COc1ccc(-c2cn(-c3ccncc3)c3cc(-c4cccc([N+](=O)[O-])c4)ccc23)cc1', 126)
+('COCCOc1ccc(-c2cnc3[nH]cc(-c4ccccc4OC)c3c2)cc1OCCOC', 122)
+('CN(C)CC=CCCCCCCCCCCCCCCCCCC[SiH3]', 111)
+('CC(C)S(=O)(=O)c1ncccc1-c1ccc(-c2cnc3[nH]ccc3c2)c(F)c1', 110)
+('CCCCC(CC)C(O)CCC1CCC(O)C1CCCCCCC(=O)O', 109)
+('CC(C)(C)CCN1C(=O)[C@H](CC(=O)N2CCC(N3CCc4ccccc4NC3=O)CC2)SC1c1cccc(F)c1NCCN1CCOCC1', 109)
+('Cc1ccc(N2C(=O)c3cccc4c(Nc5ccc6c7c(cc(=O)n6C)-c6ccccc6C(=O)c57)ccc(c34)C2=O)c(C)c1', 108)
+('NCc1ccc2c(Cc3ccc(OCCN4CCCCC4)cc3)c(-c3ccc(OCCN4CCCC4)cc3)sc2c1', 107)
+('O=C1CCCN1C1CCN(CC(O)Cn2nc(-c3ccc(C(F)(F)F)c(SCCN4CCCCC4)c3)c3c2CCN(S(=O)(=O)c2ccccc2)C3)CC1', 104)
+('CC(C)(C)OC(=O)N1CCC(=O)N(CCN2CCCC2)CC1', 103)
+('COc1ccc(-c2ccccc2)cc1CN1C[C@@H]2CCCN2[C@H](C(c2ccccc2)c2ccccc2)C1', 102)
+
+Least common 20:
+('CC(C)=CC(=O)Sc1ccc(Br)cc1', 2)
+('O=[N+]([O-])c1cccc(CBr)c1Br', 2)
+('COc1ccc(Cn2c(=O)n3ncnc3c3cc(C(C)N4C[C@H](C)O[C@H](C)C4)cnc32)cc1', 2)
+('CC(C)[Si](OC1CCC=Cc2cccnc21)(C(C)C)C(C)C', 2)
+('CC(C)C(=O)NNc1ccc(Br)cn1', 2)
+('COc1ccc(-c2nsc(S(N)=O)n2)cc1', 2)
+('Cc1cnc(/C=N/S(=O)C(C)(C)C)n1C', 2)
+('CCOC(=O)c1coc(Cn2cc(C3c4ccc(CC)cc4C=Cc4oc(C)nc43)c(=O)[nH]c2=O)n1', 2)
+('C#CC(C)c1ccccc1C(=O)c1ocnc1C', 2)
+('N=C(N)NN=Cc1c(Cl)ccc([N+](=O)[O-])c1Cl', 1)
+('CCS(=O)(=O)Oc1cc(C(C)(C)C)cc(C(C)(C)C)c1', 1)
+('CCC(C)(C)OC(=O)c1cc(Cl)c(Cl)nc1Cl', 1)
+('ON=Cc1ccc(C(F)(F)F)cc1C(F)(F)F', 1)
+('CC(C#N)(Cn1nc2c(Cl)cc(Cl)c(Br)c2n1)NC(=S)c1ccc(C(F)(F)F)cc1', 1)
+('CN(C)C=Nc1ccc([N+](=O)[O-])cc1F', 1)
+('CC(=O)NC(=S)CCc1ccco1', 1)
+('Cc1ccnc2c1C(=NNC(=N)NO)CC(c1ccsc1Br)C2', 1)
+('C=CCC1=C(c2cccc3ccc(Cl)cc23)N2CCN=C2S1', 0)
+('CC(C)(C)[S@@](=O)/N=C(/c1ccc(OC(F)(F)F)c(F)c1)c1nccnc1Cl', 0)
+('CCN1N=C(c2ccc(F)cc2)c2cc(Cl)c(Cl)cc2CS1(=O)=O', 0)
+Zipped all info for each rxn_smi into a list for dataframe creation!
+Saved proposals of test as CSV!
