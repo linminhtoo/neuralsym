@@ -251,7 +251,7 @@ def train(args):
                 \nvalid top-2 acc: {val_accs[2][-1]:.4f}, valid top-3 acc: {val_accs[3][-1]:.4f}, \
                 \nvalid top-5 acc: {val_accs[5][-1]:.4f}, valid top-10 acc: {val_accs[10][-1]:.4f}, \
                 \nvalid top-20 acc: {val_accs[20][-1]:.4f}, valid top-50 acc: {val_accs[50][-1]:.4f}, \
-                \nvalid top-100 acc: {val_accs[100][-1]:.4f}, \
+                \nvalid top-100 acc: {val_accs[100][-1]:.4f} \
                 \n" # valid_losses[-1]:.4f}
                 logging.info(message) 
                 break
@@ -275,7 +275,7 @@ def train(args):
                 \nvalid top-2 acc: {val_accs[2][-1]:.4f}, valid top-3 acc: {val_accs[3][-1]:.4f}, \
                 \nvalid top-5 acc: {val_accs[5][-1]:.4f}, valid top-10 acc: {val_accs[10][-1]:.4f}, \
                 \nvalid top-20 acc: {val_accs[20][-1]:.4f}, valid top-50 acc: {val_accs[50][-1]:.4f}, \
-                \nvalid top-100 acc: {val_accs[100][-1]:.4f}, \
+                \nvalid top-100 acc: {val_accs[100][-1]:.4f} \
             \n" # {valid_losses[-1]:.4f}
         logging.info(message)
 
@@ -388,7 +388,7 @@ def test(model, args):
     \ntest top-2 acc: {test_correct[2]/test_seen:.4f}, test top-3 acc: {test_correct[3]/test_seen:.4f}, \
     \ntest top-5 acc: {test_correct[5]/test_seen:.4f}, test top-10 acc: {test_correct[10]/test_seen:.4f}, \
     \ntest top-20 acc: {test_correct[20]/test_seen:.4f}, test top-50 acc: {test_correct[50]/test_seen:.4f}, \
-    \ntest top-100 acc: {test_correct[100]/test_seen:.4f}, \
+    \ntest top-100 acc: {test_correct[100]/test_seen:.4f} \
     \n" # \ntest loss: {test_loss/test_seen:.4f}, 
     logging.info(message)
     logging.info('Finished Testing')

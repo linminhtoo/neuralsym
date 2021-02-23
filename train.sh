@@ -5,8 +5,8 @@ conda activate neuralsym
 # higher bs --> faster training (using CPU)
 # 8 sec/epoch on 1 RTX2080
 python train.py \
-    --expt_name 'depth0_dim500_lr1e3_stop2_fac30_pat1_try' \
-    --log_file 'depth0_dim500_lr1e3_stop2_fac30_pat1_try' \
+    --expt_name 'depth0_dim300_lr1e3_stop2_fac30_pat1' \
+    --log_file 'depth0_dim300_lr1e3_stop2_fac30_pat1' \
     --do_train \
     --do_test \
     --prodfps_prefix 50k_1000000dim_2rad_to_32681_prod_fps \

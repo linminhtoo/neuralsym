@@ -1,0 +1,1117 @@
+Namespace(bs=300, bs_eval=300, checkpoint=True, csv_prefix='50k_1000000dim_2rad_to_32681_csv', depth=0, do_test=True, do_train=True, early_stop=True, early_stop_min_delta=0.0001, early_stop_patience=2, epochs=30, expt_name='depth0_dim500_lr1e3_stop2_fac30_pat1_try', fp_size=32681, hidden_size=300, labels_prefix='50k_1000000dim_2rad_to_32681_labels', learning_rate=0.001, log_file='depth0_dim500_lr1e3_stop2_fac30_pat1_try', lr_cooldown=0, lr_scheduler_factor=0.3, lr_scheduler_patience=1, min_freq=1, prodfps_prefix='50k_1000000dim_2rad_to_32681_prod_fps', radius=2, random_seed=1337, templates_file='50k_training_templates')
+Using seed: 1337
+
+Loading templates from file: 50k_training_templates
+Total number of template patterns: 10198
+Using cuda:0 device
+Loading pre-computed product fingerprints...
+Loading labels...
+Loading pre-computed product fingerprints...
+Loading labels...
+
+curr product:                          		CC(=O)C=NNc1ccccn1
+pred template:                          	[#7:3]-[N&H0&D2&+0:4]=[C&H1&D2&+0:1]-[c:2]>>O=[C&H1&D2&+0:1]-[c:2].[#7:3]-[N&H2&D1&+0:4]
+true template:                          	[#7:5]-[N&H0&D2&+0:6]=[C&H1&D2&+0:1]-[C:2](-[C&D1&H3:3])=[O&D1&H0:4]>>O=[C&H1&D2&+0:1]-[C:2](-[C&D1&H3:3])=[O&D1&H0:4].[#7:5]-[N&H2&D1&+0:6]
+pred precursor (score = +0.0002):		Template could not be applied
+true precursor (score = +0.0001):		CC(=O)C=O.NNc1ccccn1
+
+curr product:                          		Cc1ccc(C(=O)NC2CC2)cc1NC(=O)c1ccc(-c2cc(C#N)ccc2C)s1
+pred template:                          	[C:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[C:4]-[N&H2&D1&+0:5]
+true template:                          	[#16&a:5]:[c&H0&D3&+0:4](:[c:6])-[c&H0&D3&+0:1](:[c:2]):[c:3]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3].O-B(-O)-[c&H0&D3&+0:4](:[#16&a:5]):[c:6]
+pred precursor (score = +0.1565):		['Cc1ccc(C(=O)O)cc1NC(=O)c1ccc(-c2cc(C#N)ccc2C)s1.NC1CC1']
+true precursor (score = +0.0003):		Cc1ccc(C#N)cc1Br.Cc1ccc(C(=O)NC2CC2)cc1NC(=O)c1ccc(B(O)O)s1
+
+curr product:                          		CCc1nnc(CC(=O)O)s1
+pred template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+true template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+pred precursor (score = +0.1071):		['CCOC(=O)Cc1nnc(CC)s1']
+true precursor (score = +0.1071):		CCOC(=O)Cc1nnc(CC)s1
+
+curr product:                          		Cc1ccc(S(=O)(=O)Nc2nc(-c3cccc(C#N)c3)cs2)cc1
+pred template:                          	[O&D1&H0:2]=[S&H0&D4&+0:1](=[O&D1&H0:3])(-[c:4])-[N&H1&D2&+0:5]-[c:6]>>Cl-[S&H0&D4&+0:1](=[O&D1&H0:2])(=[O&D1&H0:3])-[c:4].[N&H2&D1&+0:5]-[c:6]
+true template:                          	[#16&a:5]:[c:6](:[#7&a:7])-[N&H1&D2&+0:8]-[S&H0&D4&+0:1](=[O&D1&H0:2])(=[O&D1&H0:3])-[c:4]>>Cl-[S&H0&D4&+0:1](=[O&D1&H0:2])(=[O&D1&H0:3])-[c:4].[#16&a:5]:[c:6](:[#7&a:7])-[N&H2&D1&+0:8]
+pred precursor (score = +0.0372):		['Cc1ccc(S(=O)(=O)Cl)cc1.N#Cc1cccc(-c2csc(N)n2)c1']
+true precursor (score = +0.0012):		Cc1ccc(S(=O)(=O)Cl)cc1.N#Cc1cccc(-c2csc(N)n2)c1
+
+curr product:                          		CC(C)OC(=O)N1CCC(C)(N2CCC(N3C(=O)N[C@@H]4CCCC[C@@H]43)CC2)CC1
+pred template:                          	[#8:2]-[C&H0&D3&+0:1](=[O&D1&H0:3])-[N&H0&D3&+0:5](-[C:4])-[C:6]>>Cl-[C&H0&D3&+0:1](-[#8:2])=[O&D1&H0:3].[C:4]-[N&H1&D2&+0:5]-[C:6]
+true template:                          	[#8:2]-[C&H0&D3&+0:1](=[O&D1&H0:3])-[N&H0&D3&+0:5](-[C:4])-[C:6]>>Cl-[C&H0&D3&+0:1](-[#8:2])=[O&D1&H0:3].[C:4]-[N&H1&D2&+0:5]-[C:6]
+pred precursor (score = +0.0229):		['CC(C)OC(=O)Cl.CC1(N2CCC(N3C(=O)N[C@@H]4CCCC[C@@H]43)CC2)CCNCC1']
+true precursor (score = +0.0229):		CC(C)OC(=O)Cl.CC1(N2CCC(N3C(=O)N[C@@H]4CCCC[C@@H]43)CC2)CCNCC1
+
+curr product:                          		COc1ccc(-c2cc(CN3CCN(C(=O)OC(C)(C)C)CC3)c(=O)n(CC3CCCC3)n2)cc1F
+pred template:                          	[C:3]-[N&H0&D3&+0:4](-[C:5])-[C&H2&D2&+0:1]-[c:2]>>O=[C&H1&D2&+0:1]-[c:2].[C:3]-[N&H1&D2&+0:4]-[C:5]
+true template:                          	[#7&a:4]:[c:3]:[c:2]-[C&H2&D2&+0:1]-[N&H0&D3&+0:6](-[C:5])-[C:7]>>C-S(=O)(=O)-O-[C&H2&D2&+0:1]-[c:2]:[c:3]:[#7&a:4].[C:5]-[N&H1&D2&+0:6]-[C:7]
+pred precursor (score = +0.0169):		['CC(C)(C)OC(=O)N1CCNCC1.COc1ccc(-c2cc(C=O)c(=O)n(CC3CCCC3)n2)cc1F']
+true precursor (score = +0.0008):		CC(C)(C)OC(=O)N1CCNCC1.COc1ccc(-c2cc(COS(C)(=O)=O)c(=O)n(CC3CCCC3)n2)cc1F
+
+curr product:                          		CNC(=O)NCC#Cc1cc(Cl)c(Nc2ncnc3cc(OCCCN4CCOCC4)c(OC)cc23)c2c1OCO2
+pred template:                          	[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:3]-[c:4]>>O-[C&H2&D2&+0:1]-[C:2].[O&H1&D1&+0:3]-[c:4]
+true template:                          	[c:8]-[N&H1&D2&+0:7]-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1>>Cl-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1.[N&H2&D1&+0:7]-[c:8]
+pred precursor (score = +0.0487):		['CNC(=O)NCC#Cc1cc(Cl)c(Nc2ncnc3cc(O)c(OC)cc23)c2c1OCO2.OCCCN1CCOCC1']
+true precursor (score = +0.0073):		CNC(=O)NCC#Cc1cc(Cl)c(N)c2c1OCO2.COc1cc2c(Cl)ncnc2cc1OCCCN1CCOCC1
+
+curr product:                          		O=C(O)c1ccc(-c2ccc(C(F)(F)F)cc2)nc1
+pred template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+true template:                          	[#7&a:2]:[c&H0&D3&+0:1](:[c:3])-[c&H0&D3&+0:4](:[c:5]):[c:6]>>Cl-[c&H0&D3&+0:1](:[#7&a:2]):[c:3].O-B(-O)-[c&H0&D3&+0:4](:[c:5]):[c:6]
+pred precursor (score = +0.4284):		['COC(=O)c1ccc(-c2ccc(C(F)(F)F)cc2)nc1']
+true precursor (score = +0.0008):		O=C(O)c1ccc(Cl)nc1.OB(O)c1ccc(C(F)(F)F)cc1
+
+Called a step of ReduceLROnPlateau, current LR: 0.001
+
+End of epoch: 0,                 
+train loss: 7.5719, train top-1 acc: 0.0954,                 
+train top-2 acc: 0.1333, train top-3 acc: 0.1512,                 
+train top-5 acc: 0.1784, train top-10 acc: 0.2169,                 
+train top-20 acc: 0.2661, train top-50 acc: 0.3365,                 
+valid loss: N/A, valid top-1 acc: 0.1846                 
+valid top-2 acc: 0.2463, valid top-3 acc: 0.2802,                 
+valid top-5 acc: 0.3109, valid top-10 acc: 0.3576,                 
+valid top-20 acc: 0.4011, valid top-50 acc: 0.4576,                 
+valid top-100 acc: 0.5067,             
+
+
+curr product:                          		Cn1ccc2c1CCCC2CCCl
+pred template:                          	[C:1]-[C&H1&D3&+0:2](-[O&H1&D1&+0:3])-[c:4]>>[C:1]-[C&H0&D3&+0:2](=[O&H0&D1&+0:3])-[c:4]
+true template:                          	[C:3]-[C&H2&D2&+0:2]-[Cl&H0&D1&+0:1]>>Cl-C(-Cl)(-Cl)-[Cl&H0&D1&+0:1].O-[C&H2&D2&+0:2]-[C:3]
+pred precursor (score = +0.0063):		Template could not be applied
+true precursor (score = +0.0002):		ClC(Cl)(Cl)Cl.Cn1ccc2c1CCCC2CCO
+
+curr product:                          		COc1cc(C=O)cc(OC)c1CCCCCCCCCCCCCCO[Si](C)(C)C(C)(C)C
+pred template:                          	[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:3]-[c:4]>>Br-[C&H2&D2&+0:1]-[C:2].[O&H1&D1&+0:3]-[c:4]
+true template:                          	[O&H0&D1&+0:1]=[C&H1&D2&+0:2]-[c:3]>>[O&H1&D1&+0:1]-[C&H2&D2&+0:2]-[c:3]
+pred precursor (score = +0.4110):		Template could not be applied
+true precursor (score = +0.0694):		COc1cc(CO)cc(OC)c1CCCCCCCCCCCCCCO[Si](C)(C)C(C)(C)C
+
+curr product:                          		CC[C@H](C)COc1ccc([C@H](CN)NC(=O)[C@H]2C[C@@H]2c2cccs2)c(C)c1
+pred template:                          	[C:2]-[N&H2&D1&+0:1]>>C-C(-C)(-C)-O-C(=O)-[N&H1&D2&+0:1]-[C:2]
+true template:                          	[C:2]-[N&H2&D1&+0:1]>>O=C1-[N&H0&D3&+0:1](-[C:2])-C(=O)-c2:c:c:c:c:c:2-1
+pred precursor (score = +0.2504):		['CC[C@H](C)COc1ccc([C@H](CNC(=O)OC(C)(C)C)NC(=O)[C@H]2C[C@@H]2c2cccs2)c(C)c1']
+true precursor (score = +0.0786):		CC[C@H](C)COc1ccc([C@H](CN2C(=O)c3ccccc3C2=O)NC(=O)[C@H]2C[C@@H]2c2cccs2)c(C)c1
+
+curr product:                          		CC(C)(C)OC(=O)N[C@H](CO)Cc1ccc(Br)cc1
+pred template:                          	[C:8]-[N&H1&D2&+0:9]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[#8:3]-[C:4](-[C&D1&H3:5])(-[C&D1&H3:6])-[C&D1&H3:7]>>C-C(-C)(-C)-O-C(=O)-O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[#8:3]-[C:4](-[C&D1&H3:5])(-[C&D1&H3:6])-[C&D1&H3:7].[C:8]-[N&H2&D1&+0:9]
+true template:                          	[C:2]-[C&H2&D2&+0:1]-[O&D1&H1:3]>>O=[C&H0&D3&+0:1](-[C:2])-[O&D1&H1:3]
+pred precursor (score = +0.1737):		['CC(C)(C)OC(=O)OC(=O)OC(C)(C)C.N[C@H](CO)Cc1ccc(Br)cc1']
+true precursor (score = +0.0818):		CC(C)(C)OC(=O)N[C@@H](Cc1ccc(Br)cc1)C(=O)O
+
+curr product:                          		CN(CCCCc1ccc(O)cc1)[C@H]1CC[C@H](c2ccccc2)CC1
+pred template:                          	[O&H1&D1&+0:2]-[c:1]>>[c:1]-[O&H0&D2&+0:2]-C-c1:c:c:c:c:c:1
+true template:                          	[C:2]-[N&H0&D3&+0:3](-[C:4])-[C&H3&D1&+0:1]>>O-[C&H3&D1&+0:1].[C:2]-[N&H1&D2&+0:3]-[C:4]
+pred precursor (score = +0.0358):		['CN(CCCCc1ccc(OCc2ccccc2)cc1)[C@H]1CC[C@H](c2ccccc2)CC1']
+true precursor (score = +0.0002):		CO.Oc1ccc(CCCCN[C@H]2CC[C@H](c3ccccc3)CC2)cc1
+
+curr product:                          		COC(=O)C[C@H]1C(=O)N(CC(=O)OC(C)(C)C)CCN1C(=O)[C@H](C)NC(=O)OCc1ccccc1
+pred template:                          	[#8:4]-[C:5](=[O&D1&H0:6])-[C:7]-[N&H0&D3&+0:8](-[C:9])-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>O-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[#8:4]-[C:5](=[O&D1&H0:6])-[C:7]-[N&H1&D2&+0:8]-[C:9]
+true template:                          	[#7:4]-[C:5](=[O&D1&H0:6])-[C:7]-[N&H0&D3&+0:8](-[C:9])-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>O-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[#7:4]-[C:5](=[O&D1&H0:6])-[C:7]-[N&H1&D2&+0:8]-[C:9]
+pred precursor (score = +0.1051):		['COC(=O)C[C@@H](C(=O)O)N(CCNCC(=O)OC(C)(C)C)C(=O)[C@H](C)NC(=O)OCc1ccccc1']
+true precursor (score = +0.0037):		COC(=O)C[C@@H]1NCCN(CC(=O)OC(C)(C)C)C1=O.C[C@H](NC(=O)OCc1ccccc1)C(=O)O
+Traceback (most recent call last):
+  File "train.py", line 184, in train
+    rxn_true_class = labels[rxn_idx]
+IndexError: index 240 is out of bounds for dimension 0 with size 189
+
+
+Index out of range (last minibatch)
+
+Called a step of ReduceLROnPlateau, current LR: 0.001
+
+End of epoch: 1,                 
+train loss: 5.5550, train top-1 acc: 0.2616,                 
+train top-2 acc: 0.3420, train top-3 acc: 0.3799,                 
+train top-5 acc: 0.4220, train top-10 acc: 0.4686,                 
+train top-20 acc: 0.5114, train top-50 acc: 0.5720,                 
+valid loss: N/A, valid top-1 acc: 0.2800                 
+valid top-2 acc: 0.3740, valid top-3 acc: 0.4237,                 
+valid top-5 acc: 0.4740, valid top-10 acc: 0.5205,                 
+valid top-20 acc: 0.5588, valid top-50 acc: 0.6095,                 
+valid top-100 acc: 0.6440,             
+
+
+curr product:                          		N=C(COCCc1ccc(Cl)cc1)NC(=O)c1cc(Cl)cnc1Cl
+pred template:                          	[#7&a:5]:[c:4]:[c:3]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[N&H1&D2&+0:8]-[C:7]=[N&D1&H1:6]>>O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]:[c:4]:[#7&a:5].[N&D1&H1:6]=[C:7]-[N&H2&D1&+0:8]
+true template:                          	[#7&a:5]:[c:4]:[c:3]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[N&H1&D2&+0:8]-[C:7]=[N&D1&H1:6]>>O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]:[c:4]:[#7&a:5].[N&D1&H1:6]=[C:7]-[N&H2&D1&+0:8]
+pred precursor (score = +0.0027):		['N=C(N)COCCc1ccc(Cl)cc1.O=C(O)c1cc(Cl)cnc1Cl']
+true precursor (score = +0.0027):		N=C(N)COCCc1ccc(Cl)cc1.O=C(O)c1cc(Cl)cnc1Cl
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		N#Cc1cc2nccn2cc1-c1ccc(Cl)cc1Cl
+pred template:                          	[N&D1&H0:5]#[C&H0&D2&+0:4]-[c&H0&D3&+0:1](:[c:2]):[c:3]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3].[C&-&H0&D1:4]#[N&D1&H0:5]
+true template:                          	[#7&a:4]:[c:3]:[c&H0&D3&+0:1](:[c:2])-[c&H0&D3&+0:5](:[c:6]):[c:7]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3]:[#7&a:4].O-B(-O)-[c&H0&D3&+0:5](:[c:6]):[c:7]
+pred precursor (score = +0.0186):		['Clc1ccc(-c2cn3ccnc3cc2Br)c(Cl)c1.[C-]#N']
+true precursor (score = +0.0038):		N#Cc1cc2nccn2cc1Br.OB(O)c1ccc(Cl)cc1Cl
+
+curr product:                          		COc1cc(-c2cnn(C)c2)cn2ncc(C(=O)O)c12
+pred template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+true template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+pred precursor (score = +0.6785):		['COC(=O)c1cnn2cc(-c3cnn(C)c3)cc(OC)c12']
+true precursor (score = +0.1805):		CCOC(=O)c1cnn2cc(-c3cnn(C)c3)cc(OC)c12
+
+curr product:                          		Cc1ccc(-c2nc(CO[C@@H]3CCC[C@H](CCC(C)(C)C(=O)O)C3)c(C)o2)cc1
+pred template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+true template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-C(-C)(-C)-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+pred precursor (score = +0.8041):		['COC(=O)C(C)(C)CC[C@H]1CCC[C@@H](OCc2nc(-c3ccc(C)cc3)oc2C)C1']
+true precursor (score = +0.0269):		Cc1ccc(-c2nc(CO[C@@H]3CCC[C@H](CCC(C)(C)C(=O)OC(C)(C)C)C3)c(C)o2)cc1
+
+curr product:                          		CC1(C)Cc2cc(C(=O)O)ccc2NC1c1ccccc1NC(=O)C1CCC1
+pred template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+true template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+pred precursor (score = +0.8006):		['COC(=O)c1ccc2c(c1)CC(C)(C)C(c1ccccc1NC(=O)C1CCC1)N2']
+true precursor (score = +0.8006):		COC(=O)c1ccc2c(c1)CC(C)(C)C(c1ccccc1NC(=O)C1CCC1)N2
+
+curr product:                          		COC(=O)CCc1cccc(CN(Cc2ccc(-c3nccs3)cc2)S(=O)(=O)c2ccc(Cl)cc2)c1
+pred template:                          	[C:5]-[N&H0&D3&+0:6](-[C:7])-[S&H0&D4&+0:1](=[O&D1&H0:2])(=[O&D1&H0:3])-[c:4]>>Cl-[S&H0&D4&+0:1](=[O&D1&H0:2])(=[O&D1&H0:3])-[c:4].[C:5]-[N&H1&D2&+0:6]-[C:7]
+true template:                          	[C:5]-[N&H0&D3&+0:6](-[C:7])-[S&H0&D4&+0:1](=[O&D1&H0:2])(=[O&D1&H0:3])-[c:4]>>Cl-[S&H0&D4&+0:1](=[O&D1&H0:2])(=[O&D1&H0:3])-[c:4].[C:5]-[N&H1&D2&+0:6]-[C:7]
+pred precursor (score = +0.9054):		['COC(=O)CCc1cccc(CNCc2ccc(-c3nccs3)cc2)c1.O=S(=O)(Cl)c1ccc(Cl)cc1']
+true precursor (score = +0.9054):		COC(=O)CCc1cccc(CNCc2ccc(-c3nccs3)cc2)c1.O=S(=O)(Cl)c1ccc(Cl)cc1
+
+curr product:                          		Cc1cc(C#C[Si](C(C)C)(C(C)C)C(C)C)n(-c2ccc([N+](=O)[O-])cc2)n1
+pred template:                          	[C:4]#[C&H0&D2&+0:5]-[c&H0&D3&+0:1](:[c:2]):[c:3]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3].[C:4]#[C&H1&D1&+0:5]
+true template:                          	[C:6]#[C&H0&D2&+0:7]-[c&H0&D3&+0:1]1:[#7&a:2]:[#7&a:3]:[c:4]:[c:5]:1>>Br-[c&H0&D3&+0:1]1:[#7&a:2]:[#7&a:3]:[c:4]:[c:5]:1.[C:6]#[C&H1&D1&+0:7]
+pred precursor (score = +0.1398):		Template could not be applied
+true precursor (score = +0.0003):		C#C[Si](C(C)C)(C(C)C)C(C)C.Cc1cc(Br)n(-c2ccc([N+](=O)[O-])cc2)n1
+
+Called a step of ReduceLROnPlateau, current LR: 0.001
+
+End of epoch: 2,                 
+train loss: 3.8085, train top-1 acc: 0.4222,                 
+train top-2 acc: 0.5234, train top-3 acc: 0.5716,                 
+train top-5 acc: 0.6216, train top-10 acc: 0.6742,                 
+train top-20 acc: 0.7203, train top-50 acc: 0.7756,                 
+valid loss: N/A, valid top-1 acc: 0.3510                 
+valid top-2 acc: 0.4584, valid top-3 acc: 0.5063,                 
+valid top-5 acc: 0.5650, valid top-10 acc: 0.6127,                 
+valid top-20 acc: 0.6492, valid top-50 acc: 0.6917,                 
+valid top-100 acc: 0.7168,             
+
+
+curr product:                          		CC(C)(O)c1ccc2c(c1)NC(=O)c1ccc(Nc3ccncc3)cc1N2
+pred template:                          	[#7&a:4]:[c:3]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[N&H1&D2&+0:5]-[c:6]>>C-C-O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]:[#7&a:4].[N&H2&D1&+0:5]-[c:6]
+true template:                          	[c:5]-[N&H1&D2&+0:4]-[c&H0&D3&+0:1](:[c:2]):[c:3]>>Cl-[c&H0&D3&+0:1](:[c:2]):[c:3].[N&H2&D1&+0:4]-[c:5]
+pred precursor (score = +0.1985):		Template could not be applied
+true precursor (score = +0.0004):		CC(C)(O)c1ccc2c(c1)NC(=O)c1ccc(Cl)cc1N2.Nc1ccncc1
+
+curr product:                          		CCOC(=O)C(C)(Cc1ccc(OCCN)cc1)Oc1ccccc1
+pred template:                          	[C:1]-[N&H2&D1&+0:2]>>[C:1]-[N&H0&D2&+0:2]=[N&+]=[N&-]
+true template:                          	[C:1]-[N&H2&D1&+0:2]>>[C:1]-[N&H0&D2&+0:2]=[N&+]=[N&-]
+pred precursor (score = +0.7649):		['CCOC(=O)C(C)(Cc1ccc(OCCN=[N+]=[N-])cc1)Oc1ccccc1']
+true precursor (score = +0.7649):		CCOC(=O)C(C)(Cc1ccc(OCCN=[N+]=[N-])cc1)Oc1ccccc1
+
+curr product:                          		OCCCCCC=C1CCC1
+pred template:                          	[C:2]-[C&H2&D2&+0:1]-[O&D1&H1:3]>>O=[C&H0&D3&+0:1](-[C:2])-[O&D1&H1:3]
+true template:                          	[C:2]-[C&H2&D2&+0:1]-[O&H1&D1&+0:3]>>C-O-[C&H0&D3&+0:1](-[C:2])=[O&H0&D1&+0:3]
+pred precursor (score = +0.0278):		['O=C(O)CCCCC=C1CCC1']
+true precursor (score = +0.0063):		COC(=O)CCCCC=C1CCC1
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		CCc1c(C#N)c(-c2ccc(-c3ccccc3C#N)cc2)c(C(=O)O)n1C
+pred template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+true template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+pred precursor (score = +0.8913):		['CCOC(=O)c1c(-c2ccc(-c3ccccc3C#N)cc2)c(C#N)c(CC)n1C']
+true precursor (score = +0.8913):		CCOC(=O)c1c(-c2ccc(-c3ccccc3C#N)cc2)c(C#N)c(CC)n1C
+
+curr product:                          		COC(=O)C1(C)CN(CCC=C2c3cc(C(C)(C)O)ccc3OCc3ncccc32)CCC1(O)c1ccc(Cl)cc1
+pred template:                          	[C:5]-[N&H0&D3&+0:6](-[C:7])-[C&H2&D2&+0:1]-[C:2]-[C:3]=[C:4]>>Br-[C&H2&D2&+0:1]-[C:2]-[C:3]=[C:4].[C:5]-[N&H1&D2&+0:6]-[C:7]
+true template:                          	[C:5]-[N&H0&D3&+0:6](-[C:7])-[C&H2&D2&+0:1]-[C:2]-[C:3]=[C:4]>>Br-[C&H2&D2&+0:1]-[C:2]-[C:3]=[C:4].[C:5]-[N&H1&D2&+0:6]-[C:7]
+pred precursor (score = +0.9985):		['CC(C)(O)c1ccc2c(c1)C(=CCCBr)c1cccnc1CO2.COC(=O)C1(C)CNCCC1(O)c1ccc(Cl)cc1']
+true precursor (score = +0.9985):		CC(C)(O)c1ccc2c(c1)C(=CCCBr)c1cccnc1CO2.COC(=O)C1(C)CNCCC1(O)c1ccc(Cl)cc1
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+Traceback (most recent call last):
+  File "train.py", line 184, in train
+    rxn_true_class = labels[rxn_idx]
+IndexError: index 262 is out of bounds for dimension 0 with size 189
+
+
+Index out of range (last minibatch)
+
+Called a step of ReduceLROnPlateau, current LR: 0.001
+
+End of epoch: 3,                 
+train loss: 2.2956, train top-1 acc: 0.5972,                 
+train top-2 acc: 0.7113, train top-3 acc: 0.7610,                 
+train top-5 acc: 0.8069, train top-10 acc: 0.8566,                 
+train top-20 acc: 0.8948, train top-50 acc: 0.9367,                 
+valid loss: N/A, valid top-1 acc: 0.3812                 
+valid top-2 acc: 0.4867, valid top-3 acc: 0.5434,                 
+valid top-5 acc: 0.5993, valid top-10 acc: 0.6538,                 
+valid top-20 acc: 0.6893, valid top-50 acc: 0.7292,                 
+valid top-100 acc: 0.7501,             
+
+
+curr product:                          		Nc1ccc(C2=NNC(=O)Cc3cc4c(cc32)OCO4)c(Cl)c1
+pred template:                          	[N&H2&D1&+0:1]-[c:2]>>O=[N&+&H0&D3:1](-[O&-])-[c:2]
+true template:                          	[N&H2&D1&+0:1]-[c:2]>>O=[N&+&H0&D3:1](-[O&-])-[c:2]
+pred precursor (score = +0.9920):		['O=C1Cc2cc3c(cc2C(c2ccc([N+](=O)[O-])cc2Cl)=NN1)OCO3']
+true precursor (score = +0.9920):		O=C1Cc2cc3c(cc2C(c2ccc([N+](=O)[O-])cc2Cl)=NN1)OCO3
+
+curr product:                          		CC(C)(C)CNc1ncnc(Cl)c1N
+pred template:                          	[#7&a:4]:[c:3]:[c:2]-[N&H2&D1&+0:1]>>O=[N&+&H0&D3:1](-[O&-])-[c:2]:[c:3]:[#7&a:4]
+true template:                          	[C:7]-[N&H1&D2&+0:8]-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1>>Cl-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1.[C:7]-[N&H2&D1&+0:8]
+pred precursor (score = +0.3651):		['CC(C)(C)CNc1ncnc(Cl)c1[N+](=O)[O-]']
+true precursor (score = +0.2745):		CC(C)(C)CN.Nc1c(Cl)ncnc1Cl
+
+curr product:                          		CN(C(=O)CN1C(=O)COc2ccc(C(N)=O)cc21)C(CN1CCOCC1)c1ccc(-c2ccccc2)cc1
+pred template:                          	[C:2]-[C&H2&D2&+0:1]-[N&H0&D3&+0:5](-[c:6])-[C:4]=[O&D1&H0:3]>>Br-[C&H2&D2&+0:1]-[C:2].[O&D1&H0:3]=[C:4]-[N&H1&D2&+0:5]-[c:6]
+true template:                          	[N&H2&D1&+0:4]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[N&H3&D0&+0:4]
+pred precursor (score = +0.5854):		['CN(C(=O)CBr)C(CN1CCOCC1)c1ccc(-c2ccccc2)cc1.NC(=O)c1ccc2c(c1)NC(=O)CO2']
+true precursor (score = +0.0096):		CN(C(=O)CN1C(=O)COc2ccc(C(=O)O)cc21)C(CN1CCOCC1)c1ccc(-c2ccccc2)cc1.N
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		CC(C)(C)c1cc(CO)n[nH]1
+pred template:                          	[C:2]-[O&H1&D1&+0:1]>>C-C(=O)-[O&H0&D2&+0:1]-[C:2]
+true template:                          	[#7&a:5]:[#7&a:4]:[c:3]-[C&H2&D2&+0:1]-[O&H1&D1&+0:2]>>C-C-O-[C&H0&D3&+0:1](=[O&H0&D1&+0:2])-[c:3]:[#7&a:4]:[#7&a:5]
+pred precursor (score = +0.0989):		['CC(=O)OCc1cc(C(C)(C)C)[nH]n1']
+true precursor (score = +0.0072):		CCOC(=O)c1cc(C(C)(C)C)[nH]n1
+
+curr product:                          		COCC1Cc2cc(C)cc([N+](=O)[O-])c2O1
+pred template:                          	[C:2]-[O&H0&D2&+0:3]-[C&H3&D1&+0:1]>>I-[C&H3&D1&+0:1].[C:2]-[O&H1&D1&+0:3]
+true template:                          	[C:2]-[O&H0&D2&+0:3]-[C&H3&D1&+0:1]>>I-[C&H3&D1&+0:1].[C:2]-[O&H1&D1&+0:3]
+pred precursor (score = +0.5849):		['CI.Cc1cc2c(c([N+](=O)[O-])c1)OC(CO)C2']
+true precursor (score = +0.5849):		CI.Cc1cc2c(c([N+](=O)[O-])c1)OC(CO)C2
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		Cc1cncc(N2CC[C@H](NC(=O)OC(C)(C)C)C2)c1
+pred template:                          	[#7&a:4]:[c:3]:[c&H0&D3&+0:1](:[c:2])-[N&H0&D3&+0:6](-[C:5])-[C:7]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3]:[#7&a:4].[C:5]-[N&H1&D2&+0:6]-[C:7]
+true template:                          	[#7&a:4]:[c:3]:[c&H0&D3&+0:1](:[c:2])-[N&H0&D3&+0:6](-[C:5])-[C:7]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3]:[#7&a:4].[C:5]-[N&H1&D2&+0:6]-[C:7]
+pred precursor (score = +0.8639):		['CC(C)(C)OC(=O)N[C@H]1CCNC1.Cc1cncc(Br)c1']
+true precursor (score = +0.8639):		CC(C)(C)OC(=O)N[C@H]1CCNC1.Cc1cncc(Br)c1
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+Called a step of ReduceLROnPlateau, current LR: 0.001
+
+End of epoch: 4,                 
+train loss: 1.1962, train top-1 acc: 0.7695,                 
+train top-2 acc: 0.8717, train top-3 acc: 0.9078,                 
+train top-5 acc: 0.9392, train top-10 acc: 0.9655,                 
+train top-20 acc: 0.9809, train top-50 acc: 0.9922,                 
+valid loss: N/A, valid top-1 acc: 0.3939                 
+valid top-2 acc: 0.5009, valid top-3 acc: 0.5530,                 
+valid top-5 acc: 0.6099, valid top-10 acc: 0.6621,                 
+valid top-20 acc: 0.7005, valid top-50 acc: 0.7368,                 
+valid top-100 acc: 0.7573,             
+
+
+curr product:                          		N#Cc1cccc(C=C2c3ccccc3CCc3ccccc32)c1
+pred template:                          	[C:2]=[C&H1&D2&+0:1]-[c&H0&D3&+0:3](:[c:4]):[c:5]>>Br-[C&H1&D2&+0:1]=[C:2].O-B(-O)-[c&H0&D3&+0:3](:[c:4]):[c:5]
+true template:                          	[N&D1&H0:5]#[C&H0&D2&+0:4]-[c&H0&D3&+0:1](:[c:2]):[c:3]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3].[#29]-[C&H0&D2&+0:4]#[N&D1&H0:5]
+pred precursor (score = +0.6552):		['BrC=C1c2ccccc2CCc2ccccc21.N#Cc1cccc(B(O)O)c1']
+true precursor (score = +0.0247):		Brc1cccc(C=C2c3ccccc3CCc3ccccc32)c1.N#C[Cu]
+
+curr product:                          		Cc1c(NCCN2CCCC2)cc(-c2nc(-c3ccccc3)no2)cc1N1CCNCC1
+pred template:                          	[C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
+true template:                          	[C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
+pred precursor (score = +0.8927):		['Cc1c(NCCN2CCCC2)cc(-c2nc(-c3ccccc3)no2)cc1N1CCN(C(=O)OC(C)(C)C)CC1']
+true precursor (score = +0.8927):		Cc1c(NCCN2CCCC2)cc(-c2nc(-c3ccccc3)no2)cc1N1CCN(C(=O)OC(C)(C)C)CC1
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		CNC(=O)c1ccc(-c2nn(-c3c(F)cccc3F)c3ccnc(OC)c23)cc1
+pred template:                          	[C&D1&H3:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[C&D1&H3:4]-[N&H2&D1&+0:5]
+true template:                          	[C&D1&H3:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[C&D1&H3:4]-[N&H2&D1&+0:5]
+pred precursor (score = +0.9711):		['CN.COc1nccc2c1c(-c1ccc(C(=O)O)cc1)nn2-c1c(F)cccc1F']
+true precursor (score = +0.9711):		CN.COc1nccc2c1c(-c1ccc(C(=O)O)cc1)nn2-c1c(F)cccc1F
+
+curr product:                          		COc1ccccc1-c1ccc(-n2cc(NC(N)=O)c(C(N)=O)n2)cc1F
+pred template:                          	[c:2]:[c&H0&D3&+0:1](:[c:3])-[c&H0&D3&+0:4](:[c:5]):[c:6]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3].O-B(-O)-[c&H0&D3&+0:4](:[c:5]):[c:6]
+true template:                          	[C&H3&D1&+0:1]-[O&H0&D2&+0:2]-[c:3]>>I-[C&H3&D1&+0:1].[O&H1&D1&+0:2]-[c:3]
+pred precursor (score = +0.2722):		['COc1ccccc1B(O)O.NC(=O)Nc1cn(-c2ccc(Br)c(F)c2)nc1C(N)=O', 'COc1ccccc1Br.NC(=O)Nc1cn(-c2ccc(B(O)O)c(F)c2)nc1C(N)=O']
+true precursor (score = +0.0000):		CI.NC(=O)Nc1cn(-c2ccc(-c3ccccc3O)c(F)c2)nc1C(N)=O
+
+curr product:                          		CN(C(=O)OC(C)(C)C)C1CN(c2cc(Cl)ncn2)C1
+pred template:                          	[C:7]-[N&H0&D3&+0:8](-[C:9])-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1>>Cl-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1.[C:7]-[N&H1&D2&+0:8]-[C:9]
+true template:                          	[C:7]-[N&H0&D3&+0:8](-[C:9])-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1>>Cl-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1.[C:7]-[N&H1&D2&+0:8]-[C:9]
+pred precursor (score = +0.9953):		['CN(C(=O)OC(C)(C)C)C1CNC1.Clc1cc(Cl)ncn1']
+true precursor (score = +0.9953):		CN(C(=O)OC(C)(C)C)C1CNC1.Clc1cc(Cl)ncn1
+
+curr product:                          		Oc1c(-c2ccnc(Cl)n2)cccc1C(F)(F)F
+pred template:                          	[#7&a:10]:[c:9]:[c&H0&D3&+0:7](:[c:8])-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1>>Cl-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1.O-B(-O)-[c&H0&D3&+0:7](:[c:8]):[c:9]:[#7&a:10]
+true template:                          	[c:8]:[c&H0&D3&+0:7](:[c:9])-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1>>Cl-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1.O-B(-O)-[c&H0&D3&+0:7](:[c:8]):[c:9]
+pred precursor (score = +0.2137):		Template could not be applied
+true precursor (score = +0.0150):		Clc1ccnc(Cl)n1.OB(O)c1cccc(C(F)(F)F)c1O
+
+curr product:                          		C#CCOC(C(=O)Nc1cnccc1-c1ccc(OC)c(OC)c1)c1ccc(Cl)cc1
+pred template:                          	[C&D1&H1:3]#[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:4]-[c:5]>>Br-[C&H2&D2&+0:1]-[C:2]#[C&D1&H1:3].[O&H1&D1&+0:4]-[c:5]
+true template:                          	[#7&a:4]:[c:5]:[c:6]-[N&H1&D2&+0:7]-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>Cl-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[#7&a:4]:[c:5]:[c:6]-[N&H2&D1&+0:7]
+pred precursor (score = +0.0674):		Template could not be applied
+true precursor (score = +0.0007):		C#CCOC(C(=O)Cl)c1ccc(Cl)cc1.COc1ccc(-c2ccncc2N)cc1OC
+
+curr product:                          		CCCCCCCCCCCCCCOc1ccc(NCc2cccnc2)cc1
+pred template:                          	[c:4]-[N&H1&D2&+0:3]-[C&H2&D2&+0:1]-[c:2]>>O=[C&H1&D2&+0:1]-[c:2].[N&H2&D1&+0:3]-[c:4]
+true template:                          	[#7&a:4]:[c:3]:[c:2]-[C&H2&D2&+0:1]-[N&H1&D2&+0:5]-[c:6]>>O=[C&H1&D2&+0:1]-[c:2]:[c:3]:[#7&a:4].[N&H2&D1&+0:5]-[c:6]
+pred precursor (score = +0.1854):		['CCCCCCCCCCCCCCOc1ccc(N)cc1.O=Cc1cccnc1']
+true precursor (score = +0.1378):		CCCCCCCCCCCCCCOc1ccc(N)cc1.O=Cc1cccnc1
+Traceback (most recent call last):
+  File "train.py", line 184, in train
+    rxn_true_class = labels[rxn_idx]
+IndexError: index 266 is out of bounds for dimension 0 with size 189
+
+
+Index out of range (last minibatch)
+
+Called a step of ReduceLROnPlateau, current LR: 0.001
+
+End of epoch: 5,                 
+train loss: 0.6039, train top-1 acc: 0.8759,                 
+train top-2 acc: 0.9491, train top-3 acc: 0.9698,                 
+train top-5 acc: 0.9838, train top-10 acc: 0.9939,                 
+train top-20 acc: 0.9976, train top-50 acc: 0.9994,                 
+valid loss: N/A, valid top-1 acc: 0.3955                 
+valid top-2 acc: 0.5065, valid top-3 acc: 0.5578,                 
+valid top-5 acc: 0.6152, valid top-10 acc: 0.6667,                 
+valid top-20 acc: 0.7011, valid top-50 acc: 0.7372,                 
+valid top-100 acc: 0.7605,             
+
+
+curr product:                          		COC(=O)C(=O)c1ccc(OCCOC2CCCCC2)cc1
+pred template:                          	[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:3]-[c:4]>>Br-[C&H2&D2&+0:1]-[C:2].[O&H1&D1&+0:3]-[c:4]
+true template:                          	[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:3]-[c:4]>>O-[C&H2&D2&+0:1]-[C:2].[O&H1&D1&+0:3]-[c:4]
+pred precursor (score = +0.6145):		['BrCCOC1CCCCC1.COC(=O)C(=O)c1ccc(O)cc1']
+true precursor (score = +0.3320):		COC(=O)C(=O)c1ccc(O)cc1.OCCOC1CCCCC1
+
+curr product:                          		COc1ccc2c(c1)C(c1ccc(Cl)cc1)=N[C@@H](CC(=O)NCCN)c1nnc(C)n1-2
+pred template:                          	[C:2]-[N&H2&D1&+0:1]>>C-C(-C)(-C)-O-C(=O)-[N&H1&D2&+0:1]-[C:2]
+true template:                          	[C:2]-[N&H2&D1&+0:1]>>C-C(-C)(-C)-O-C(=O)-[N&H1&D2&+0:1]-[C:2]
+pred precursor (score = +0.9999):		['COc1ccc2c(c1)C(c1ccc(Cl)cc1)=N[C@@H](CC(=O)NCCNC(=O)OC(C)(C)C)c1nnc(C)n1-2']
+true precursor (score = +0.9999):		COc1ccc2c(c1)C(c1ccc(Cl)cc1)=N[C@@H](CC(=O)NCCNC(=O)OC(C)(C)C)c1nnc(C)n1-2
+
+curr product:                          		Cc1ccc(CCNC(=S)Nc2ccc3c(c2)c(C(F)(F)F)cc(=O)n3C)cc1
+pred template:                          	[C:1]-[N&H1&D2&+0:2]-[C&H0&D3&+0:4](=[S&D1&H0:3])-[N&H1&D2&+0:5]-[c:6]>>[C:1]-[N&H2&D1&+0:2].[S&D1&H0:3]=[C&H0&D2&+0:4]=[N&H0&D2&+0:5]-[c:6]
+true template:                          	[C:1]-[N&H1&D2&+0:2]-[C&H0&D3&+0:3](=[S&D1&H0:4])-[N&H1&D2&+0:5]-[c:6]>>[C:1]-[N&H0&D2&+0:2]=[C&H0&D2&+0:3]=[S&D1&H0:4].[N&H2&D1&+0:5]-[c:6]
+pred precursor (score = +0.6108):		['Cc1ccc(CCN)cc1.Cn1c(=O)cc(C(F)(F)F)c2cc(N=C=S)ccc21']
+true precursor (score = +0.1939):		Cc1ccc(CCN=C=S)cc1.Cn1c(=O)cc(C(F)(F)F)c2cc(N)ccc21
+
+curr product:                          		O=C(NCCc1cccs1)C1CCCCC1
+pred template:                          	[C:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>Cl-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[C:4]-[N&H2&D1&+0:5]
+true template:                          	[C:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>Cl-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[C:4]-[N&H2&D1&+0:5]
+pred precursor (score = +0.7614):		['NCCc1cccs1.O=C(Cl)C1CCCCC1']
+true precursor (score = +0.7614):		NCCc1cccs1.O=C(Cl)C1CCCCC1
+
+curr product:                          		CCCCCCCCCCCCC(=O)Oc1ccc(C(=O)Oc2ccc(OCc3ccccc3)cc2)cc1
+pred template:                          	[O&D1&H0:2]=[C&H0&D3&+0:1](-[c:3])-[O&H0&D2&+0:4]-[c:5]>>O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[O&H1&D1&+0:4]-[c:5]
+true template:                          	[O&D1&H0:2]=[C&H0&D3&+0:1](-[c:3])-[O&H0&D2&+0:4]-[c:5]>>O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[O&H1&D1&+0:4]-[c:5]
+pred precursor (score = +0.7923):		['CCCCCCCCCCCCC(=O)Oc1ccc(C(=O)O)cc1.Oc1ccc(OCc2ccccc2)cc1']
+true precursor (score = +0.7923):		CCCCCCCCCCCCC(=O)Oc1ccc(C(=O)O)cc1.Oc1ccc(OCc2ccccc2)cc1
+
+curr product:                          		O=C(Nc1cccnc1)c1ccc2[nH]c3c(c2c1)CCCC3=NO
+pred template:                          	[#7&a:5]:[c:4]:[c:3]-[C&H0&D3&+0:1](-[C:2])=[N&H0&D2&+0:6]-[O&D1&H1:7]>>O=[C&H0&D3&+0:1](-[C:2])-[c:3]:[c:4]:[#7&a:5].[N&H2&D1&+0:6]-[O&D1&H1:7]
+true template:                          	[#7&a:4]:[c:3]-[C&H0&D3&+0:1](-[C:2])=[N&H0&D2&+0:5]-[O&D1&H1:6]>>O=[C&H0&D3&+0:1](-[C:2])-[c:3]:[#7&a:4].[N&H2&D1&+0:5]-[O&D1&H1:6]
+pred precursor (score = +0.9221):		Template could not be applied
+true precursor (score = +0.0256):		NO.O=C(Nc1cccnc1)c1ccc2[nH]c3c(c2c1)CCCC3=O
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		O=C(COc1ccc(CCCCNC(=O)OCc2ccccc2)cc1)Nc1ccccc1
+pred template:                          	[C:2]-[C&H0&D3&+0:1](=[O&D1&H0:3])-[N&H1&D2&+0:4]-[c:5]>>O-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[N&H2&D1&+0:4]-[c:5]
+true template:                          	[C:2]-[C&H0&D3&+0:1](=[O&D1&H0:3])-[N&H1&D2&+0:4]-[c:5]>>O-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[N&H2&D1&+0:4]-[c:5]
+pred precursor (score = +0.5377):		['Nc1ccccc1.O=C(O)COc1ccc(CCCCNC(=O)OCc2ccccc2)cc1']
+true precursor (score = +0.5377):		Nc1ccccc1.O=C(O)COc1ccc(CCCCNC(=O)OCc2ccccc2)cc1
+Traceback (most recent call last):
+  File "train.py", line 184, in train
+    rxn_true_class = labels[rxn_idx]
+IndexError: index 264 is out of bounds for dimension 0 with size 189
+
+
+Index out of range (last minibatch)
+
+Called a step of ReduceLROnPlateau, current LR: 0.001
+
+Increase in valid acc < early stop min delta 0.0001,                     
+patience count: 1                     
+
+
+End of epoch: 6,                 
+train loss: 0.3444, train top-1 acc: 0.9263,                 
+train top-2 acc: 0.9776, train top-3 acc: 0.9888,                 
+train top-5 acc: 0.9955, train top-10 acc: 0.9984,                 
+train top-20 acc: 0.9997, train top-50 acc: 0.9999,                 
+valid loss: N/A, valid top-1 acc: 0.3945                 
+valid top-2 acc: 0.5045, valid top-3 acc: 0.5568,                 
+valid top-5 acc: 0.6119, valid top-10 acc: 0.6677,                 
+valid top-20 acc: 0.7037, valid top-50 acc: 0.7434,                 
+valid top-100 acc: 0.7643,             
+
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		NNc1cc2c(nn1)CCN(C(=O)OCc1ccccc1)C2
+pred template:                          	[#7&a:4]:[#7&a:3]:[c&H0&D3&+0:1](:[c:2])-[N&H1&D2&+0:6]-[N&D1&H2:5]>>Cl-[c&H0&D3&+0:1](:[c:2]):[#7&a:3]:[#7&a:4].[N&D1&H2:5]-[N&H2&D1&+0:6]
+true template:                          	[#7&a:4]:[#7&a:3]:[c&H0&D3&+0:1](:[c:2])-[N&H1&D2&+0:6]-[N&D1&H2:5]>>Cl-[c&H0&D3&+0:1](:[c:2]):[#7&a:3]:[#7&a:4].[N&D1&H2:5]-[N&H2&D1&+0:6]
+pred precursor (score = +0.9987):		['NN.O=C(OCc1ccccc1)N1CCc2nnc(Cl)cc2C1']
+true precursor (score = +0.9987):		NN.O=C(OCc1ccccc1)N1CCc2nnc(Cl)cc2C1
+
+curr product:                          		[N-]=[N+]=N[C@@H]1CNCC[C@H]1O
+pred template:                          	[C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
+true template:                          	[C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
+pred precursor (score = +0.4974):		['CC(C)(C)OC(=O)N1CC[C@@H](O)[C@H](N=[N+]=[N-])C1']
+true precursor (score = +0.4974):		CC(C)(C)OC(=O)N1CC[C@@H](O)[C@H](N=[N+]=[N-])C1
+
+curr product:                          		CNc1cc(C(=O)O)ccc1NC(=O)[C@@H]1N[C@@H](CC(C)(C)C)[C@@]2(C(=O)Nc3cc(Cl)ccc32)[C@H]1c1cccc(Cl)c1F
+pred template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+true template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+pred precursor (score = +0.8626):		['CNc1cc(C(=O)OC)ccc1NC(=O)[C@@H]1N[C@@H](CC(C)(C)C)[C@@]2(C(=O)Nc3cc(Cl)ccc32)[C@H]1c1cccc(Cl)c1F']
+true precursor (score = +0.8626):		CNc1cc(C(=O)OC)ccc1NC(=O)[C@@H]1N[C@@H](CC(C)(C)C)[C@@]2(C(=O)Nc3cc(Cl)ccc32)[C@H]1c1cccc(Cl)c1F
+
+curr product:                          		Cc1oc2c(C)c(C)c(NCc3ccc(F)cc3)c(C)c2c1-c1ccc(C(C)C)cc1
+pred template:                          	[#7:2]-[C&H2&D2&+0:1]-[c:3]>>O=[C&H0&D3&+0:1](-[#7:2])-[c:3]
+true template:                          	[#7:2]-[C&H2&D2&+0:1]-[c:3]>>O=[C&H0&D3&+0:1](-[#7:2])-[c:3]
+pred precursor (score = +0.9612):		['Cc1oc2c(C)c(C)c(NC(=O)c3ccc(F)cc3)c(C)c2c1-c1ccc(C(C)C)cc1']
+true precursor (score = +0.9612):		Cc1oc2c(C)c(C)c(NC(=O)c3ccc(F)cc3)c(C)c2c1-c1ccc(C(C)C)cc1
+
+curr product:                          		Cc1sc(C(=O)O)cc1-c1c(C(C)C)cnn1C
+pred template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+true template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+pred precursor (score = +0.9672):		['COC(=O)c1cc(-c2c(C(C)C)cnn2C)c(C)s1']
+true precursor (score = +0.9672):		COC(=O)c1cc(-c2c(C(C)C)cnn2C)c(C)s1
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+Traceback (most recent call last):
+  File "train.py", line 184, in train
+    rxn_true_class = labels[rxn_idx]
+IndexError: index 235 is out of bounds for dimension 0 with size 189
+
+
+Index out of range (last minibatch)
+
+Called a step of ReduceLROnPlateau, current LR: 0.0003
+
+Increase in valid acc < early stop min delta 0.0001,                     
+patience count: 2                     
+
+
+End of epoch: 7,                 
+train loss: 0.2218, train top-1 acc: 0.9506,                 
+train top-2 acc: 0.9879, train top-3 acc: 0.9952,                 
+train top-5 acc: 0.9985, train top-10 acc: 0.9995,                 
+train top-20 acc: 0.9999, train top-50 acc: 1.0000,                 
+valid loss: N/A, valid top-1 acc: 0.3949                 
+valid top-2 acc: 0.5075, valid top-3 acc: 0.5578,                 
+valid top-5 acc: 0.6144, valid top-10 acc: 0.6689,                 
+valid top-20 acc: 0.7037, valid top-50 acc: 0.7430,                 
+valid top-100 acc: 0.7649,             
+
+
+curr product:                          		Cc1cc([N+](=O)[O-])ccc1Oc1cccc(C2(C(N)=O)CC2)c1
+pred template:                          	[C:2]-[C&H0&D3&+0:1](-[N&H2&D1&+0:4])=[O&D1&H0:3]>>O-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[N&H3&D0&+0:4]
+true template:                          	[c:2]:[c&H0&D3&+0:1](:[c:3])-[O&H0&D2&+0:4]-[c:5]>>F-[c&H0&D3&+0:1](:[c:2]):[c:3].[O&H1&D1&+0:4]-[c:5]
+pred precursor (score = +0.4170):		['Cc1cc([N+](=O)[O-])ccc1Oc1cccc(C2(C(=O)O)CC2)c1.N']
+true precursor (score = +0.2108):		Cc1cc([N+](=O)[O-])ccc1F.NC(=O)C1(c2cccc(O)c2)CC1
+
+curr product:                          		O=C1CCN(c2ccc(NS(=O)(=O)c3ccc(S(=O)(=O)c4ccc(C(F)(F)F)cn4)s3)cc2)CC1
+pred template:                          	[C:1]-[C&H0&D3&+0:2](-[C:3])=[O&H0&D1&+0:4]>>[C:1]-[C&H0&D4&+0:2]1(-[C:3])-O-C-C-[O&H0&D2&+0:4]-1
+true template:                          	[#16&a:5]:[c:4]-[S&H0&D4&+0:1](=[O&D1&H0:2])(=[O&D1&H0:3])-[N&H1&D2&+0:6]-[c:7]>>Cl-[S&H0&D4&+0:1](=[O&D1&H0:2])(=[O&D1&H0:3])-[c:4]:[#16&a:5].[N&H2&D1&+0:6]-[c:7]
+pred precursor (score = +0.8709):		['O=S(=O)(Nc1ccc(N2CCC3(CC2)OCCO3)cc1)c1ccc(S(=O)(=O)c2ccc(C(F)(F)F)cn2)s1']
+true precursor (score = +0.1065):		Nc1ccc(N2CCC(=O)CC2)cc1.O=S(=O)(Cl)c1ccc(S(=O)(=O)c2ccc(C(F)(F)F)cn2)s1
+
+curr product:                          		OC1CN(Cc2ccccc2)CCC1c1ccc(Br)cc1
+pred template:                          	[C:1]-[C&H1&D3&+0:2](-[C:3])-[O&H1&D1&+0:4]>>[C:1]-[C&H0&D3&+0:2](-[C:3])=[O&H0&D1&+0:4]
+true template:                          	[#7:1]-[C:2]-[C&H1&D3&+0:3](-[O&H1&D1&+0:7])-[C&H1&D3&+0:4](-[C:5])-[c:6]>>[#7:1]-[C:2]-[C&H1&D2&+0:3]=[C&H0&D3&+0:4](-[C:5])-[c:6].[O&H2&D0&+0:7]
+pred precursor (score = +0.1669):		['O=C1CN(Cc2ccccc2)CCC1c1ccc(Br)cc1']
+true precursor (score = +0.0025):		Brc1ccc(C2=CCN(Cc3ccccc3)CC2)cc1.O
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		COC(=O)c1nc(-c2cccc(N)c2)n(C)c(=O)c1OC(=O)C(C)(C)C
+pred template:                          	[N&H2&D1&+0:1]-[c:2]>>O=[N&+&H0&D3:1](-[O&-])-[c:2]
+true template:                          	[N&H2&D1&+0:1]-[c:2]>>O=[N&+&H0&D3:1](-[O&-])-[c:2]
+pred precursor (score = +0.5261):		['COC(=O)c1nc(-c2cccc([N+](=O)[O-])c2)n(C)c(=O)c1OC(=O)C(C)(C)C']
+true precursor (score = +0.5261):		COC(=O)c1nc(-c2cccc([N+](=O)[O-])c2)n(C)c(=O)c1OC(=O)C(C)(C)C
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		Nc1nc(NCCc2cc(Br)cs2)nc2c1ncn2[C@@H]1O[C@H](CO)[C@@H](O)[C@H]1O
+pred template:                          	[#7&a:2]:[c&H0&D3&+0:1](:[#7&a:3])-[N&H1&D2&+0:5]-[C:4]>>Cl-[c&H0&D3&+0:1](:[#7&a:2]):[#7&a:3].[C:4]-[N&H2&D1&+0:5]
+true template:                          	[#7&a:2]:[c&H0&D3&+0:1](:[#7&a:3])-[N&H1&D2&+0:5]-[C:4]>>Cl-[c&H0&D3&+0:1](:[#7&a:2]):[#7&a:3].[C:4]-[N&H2&D1&+0:5]
+pred precursor (score = +0.7700):		['NCCc1cc(Br)cs1.Nc1nc(Cl)nc2c1ncn2[C@@H]1O[C@H](CO)[C@@H](O)[C@H]1O']
+true precursor (score = +0.7700):		NCCc1cc(Br)cs1.Nc1nc(Cl)nc2c1ncn2[C@@H]1O[C@H](CO)[C@@H](O)[C@H]1O
+
+curr product:                          		Cc1cc(C)nc(N2CCCC2)n1
+pred template:                          	[#7&a:2]:[c&H0&D3&+0:1](:[#7&a:3])-[N&H0&D3&+0:5](-[C:4])-[C:6]>>Cl-[c&H0&D3&+0:1](:[#7&a:2]):[#7&a:3].[C:4]-[N&H1&D2&+0:5]-[C:6]
+true template:                          	[#7&a:2]:[c&H0&D3&+0:1](:[#7&a:3])-[N&H0&D3&+0:5](-[C:4])-[C:6]>>Cl-[c&H0&D3&+0:1](:[#7&a:2]):[#7&a:3].[C:4]-[N&H1&D2&+0:5]-[C:6]
+pred precursor (score = +0.0481):		['C1CCNC1.Cc1cc(C)nc(Cl)n1']
+true precursor (score = +0.0481):		C1CCNC1.Cc1cc(C)nc(Cl)n1
+
+curr product:                          		CC(Cl)C(=O)c1ccc(F)cc1
+pred template:                          	[C:2]-[C&H0&D3&+0:1](=[O&D1&H0:3])-[c&H0&D3&+0:5](:[c:4]):[c:6]>>Cl-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[c:4]:[c&H1&D2&+0:5]:[c:6]
+true template:                          	[C:2]-[C&H0&D3&+0:1](=[O&D1&H0:3])-[c&H0&D3&+0:5](:[c:4]):[c:6]>>Cl-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[c:4]:[c&H1&D2&+0:5]:[c:6]
+pred precursor (score = +0.0803):		['CC(Cl)C(=O)Cl.Fc1ccccc1']
+true precursor (score = +0.0803):		CC(Cl)C(=O)Cl.Fc1ccccc1
+
+curr product:                          		CCCCC(=O)NC1CCN(CCNC(=O)c2nn(C(C)C)c3ccccc23)CC1
+pred template:                          	[C:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>O-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[C:4]-[N&H2&D1&+0:5]
+true template:                          	[C:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>Cl-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[C:4]-[N&H2&D1&+0:5]
+pred precursor (score = +0.9943):		['CC(C)n1nc(C(=O)NCCN2CCC(N)CC2)c2ccccc21.CCCCC(=O)O']
+true precursor (score = +0.0043):		CC(C)n1nc(C(=O)NCCN2CCC(N)CC2)c2ccccc21.CCCCC(=O)Cl
+
+Called a step of ReduceLROnPlateau, current LR: 0.0003
+
+End of epoch: 8,                 
+train loss: 0.1402, train top-1 acc: 0.9716,                 
+train top-2 acc: 0.9948, train top-3 acc: 0.9980,                 
+train top-5 acc: 0.9994, train top-10 acc: 0.9999,                 
+train top-20 acc: 1.0000, train top-50 acc: 1.0000,                 
+valid loss: N/A, valid top-1 acc: 0.3993                 
+valid top-2 acc: 0.5091, valid top-3 acc: 0.5618,                 
+valid top-5 acc: 0.6170, valid top-10 acc: 0.6717,                 
+valid top-20 acc: 0.7094, valid top-50 acc: 0.7448,                 
+valid top-100 acc: 0.7677,             
+
+
+curr product:                          		CCCS(=O)(=O)Nc1ccc(F)c(NC(=O)c2cc(C)cc3c(N)ncnc23)c1F
+pred template:                          	[C:7]-[N&H1&D2&+0:8]-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1>>Cl-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1.[C:7]-[N&H2&D1&+0:8]
+true template:                          	[N&H2&D1&+0:7]-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1>>Cl-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1.[N&H3&D0&+0:7]
+pred precursor (score = +0.8222):		Template could not be applied
+true precursor (score = +0.0006):		CCCS(=O)(=O)Nc1ccc(F)c(NC(=O)c2cc(C)cc3c(Cl)ncnc23)c1F.N
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		COc1ccc(-n2c(-c3ccc(C(=O)NC(C)c4ccccc4)cc3)nc3ccccc32)cc1
+pred template:                          	[C:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>Cl-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[C:4]-[N&H2&D1&+0:5]
+true template:                          	[C:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[C:4]-[N&H2&D1&+0:5]
+pred precursor (score = +0.5307):		['CC(N)c1ccccc1.COc1ccc(-n2c(-c3ccc(C(=O)Cl)cc3)nc3ccccc32)cc1']
+true precursor (score = +0.2997):		CC(N)c1ccccc1.COc1ccc(-n2c(-c3ccc(C(=O)O)cc3)nc3ccccc32)cc1
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		OC(c1ccccc1)(c1ccccc1)C1CCN(CCCOc2ccc(-c3ccncc3)cc2)CC1
+pred template:                          	[C:2]-[C&H2&D2&+0:1]-[N&H0&D3&+0:4](-[C:3])-[C:5]>>Cl-[C&H2&D2&+0:1]-[C:2].[C:3]-[N&H1&D2&+0:4]-[C:5]
+true template:                          	[c:2]:[c&H0&D3&+0:1](:[c:3])-[c&H0&D3&+0:4]1:[c:5]:[c:6]:[#7&a:7]:[c:8]:[c:9]:1>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3].O-B(-O)-[c&H0&D3&+0:4]1:[c:5]:[c:6]:[#7&a:7]:[c:8]:[c:9]:1
+pred precursor (score = +0.9095):		['OC(c1ccccc1)(c1ccccc1)C(CCCl)CCNCCCOc1ccc(-c2ccncc2)cc1', 'ClCCCOc1ccc(-c2ccncc2)cc1.OC(c1ccccc1)(c1ccccc1)C1CCNCC1']
+true precursor (score = +0.0574):		OB(O)c1ccncc1.OC(c1ccccc1)(c1ccccc1)C1CCN(CCCOc2ccc(Br)cc2)CC1
+
+curr product:                          		Cc1cc(COc2ccc(C(O)C(CNCc3ccccc3)C(=O)NO)cc2)c2ccccc2n1
+pred template:                          	[C:3]-[N&H1&D2&+0:4]-[C&H2&D2&+0:1]-[c:2]>>O=[C&H1&D2&+0:1]-[c:2].[C:3]-[N&H2&D1&+0:4]
+true template:                          	[C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
+pred precursor (score = +0.9446):		['Cc1cc(COc2ccc(C(O)C(CN)C(=O)NO)cc2)c2ccccc2n1.O=Cc1ccccc1']
+true precursor (score = +0.0000):		Cc1cc(COc2ccc(C(O)C(CN(Cc3ccccc3)C(=O)OC(C)(C)C)C(=O)NO)cc2)c2ccccc2n1
+
+curr product:                          		Cn1ncc2c(ccn2Cc2ccc(C(=O)c3ccc(Cl)cc3)cc2)c1=O
+pred template:                          	[#7&a:3]:[c:4]:[c:5]:[n&H0&D3&+0:6](:[c:7])-[C&H2&D2&+0:1]-[c:2]>>Br-[C&H2&D2&+0:1]-[c:2].[#7&a:3]:[c:4]:[c:5]:[n&H1&D2&+0:6]:[c:7]
+true template:                          	[#7&a:3]:[c:4]:[c:5]:[n&H0&D3&+0:6](:[c:7])-[C&H2&D2&+0:1]-[c:2]>>Br-[C&H2&D2&+0:1]-[c:2].[#7&a:3]:[c:4]:[c:5]:[n&H1&D2&+0:6]:[c:7]
+pred precursor (score = +0.9792):		['Cn1ncc2[nH]ccc2c1=O.O=C(c1ccc(Cl)cc1)c1ccc(CBr)cc1']
+true precursor (score = +0.9792):		Cn1ncc2[nH]ccc2c1=O.O=C(c1ccc(Cl)cc1)c1ccc(CBr)cc1
+
+curr product:                          		CC(C)c1ccccc1N1CCNCC1
+pred template:                          	[C:1]-[N&H1&D2&+0:2]-[C:3]>>[C:1]-[N&H0&D3&+0:2](-[C:3])-C-c1:c:c:c:c:c:1
+true template:                          	[C:4]-[N&H0&D3&+0:5](-[C:6])-[c&H0&D3&+0:1](:[c:2]):[c:3]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3].[C:4]-[N&H1&D2&+0:5]-[C:6]
+pred precursor (score = +0.4741):		['CC(C)c1ccccc1N1CCN(Cc2ccccc2)CC1']
+true precursor (score = +0.0705):		C1CNCCN1.CC(C)c1ccccc1Br
+
+curr product:                          		CC(C)N1CC(F)(F)C(=O)N(C)c2cnc(Cl)nc21
+pred template:                          	[#7&a:2]:[c:3]:[c:4](:[c:8]:[#7&a:9])-[N&H0&D3&+0:5](-[C&H3&D1&+0:1])-[C:6]=[O&D1&H0:7]>>I-[C&H3&D1&+0:1].[#7&a:2]:[c:3]:[c:4](-[N&H1&D2&+0:5]-[C:6]=[O&D1&H0:7]):[c:8]:[#7&a:9]
+true template:                          	[#7&a:2]:[c:3]:[c:4](:[c:8]:[#7&a:9])-[N&H0&D3&+0:5](-[C&H3&D1&+0:1])-[C:6]=[O&D1&H0:7]>>I-[C&H3&D1&+0:1].[#7&a:2]:[c:3]:[c:4](-[N&H1&D2&+0:5]-[C:6]=[O&D1&H0:7]):[c:8]:[#7&a:9]
+pred precursor (score = +0.7018):		['CC(C)N1CC(F)(F)C(=O)Nc2cnc(Cl)nc21.CI']
+true precursor (score = +0.7018):		CC(C)N1CC(F)(F)C(=O)Nc2cnc(Cl)nc21.CI
+Traceback (most recent call last):
+  File "train.py", line 184, in train
+    rxn_true_class = labels[rxn_idx]
+IndexError: index 245 is out of bounds for dimension 0 with size 189
+
+
+Index out of range (last minibatch)
+
+Called a step of ReduceLROnPlateau, current LR: 0.0003
+
+End of epoch: 9,                 
+train loss: 0.1124, train top-1 acc: 0.9788,                 
+train top-2 acc: 0.9963, train top-3 acc: 0.9985,                 
+train top-5 acc: 0.9997, train top-10 acc: 0.9999,                 
+train top-20 acc: 1.0000, train top-50 acc: 1.0000,                 
+valid loss: N/A, valid top-1 acc: 0.4011                 
+valid top-2 acc: 0.5103, valid top-3 acc: 0.5632,                 
+valid top-5 acc: 0.6192, valid top-10 acc: 0.6743,                 
+valid top-20 acc: 0.7096, valid top-50 acc: 0.7438,                 
+valid top-100 acc: 0.7671,             
+
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		O=C(NC1CCCOC1)c1ccc2nonc2c1
+pred template:                          	[C:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[C:4]-[N&H2&D1&+0:5]
+true template:                          	[C:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>Cl-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[C:4]-[N&H2&D1&+0:5]
+pred precursor (score = +0.8829):		['NC1CCCOC1.O=C(O)c1ccc2nonc2c1']
+true precursor (score = +0.0667):		NC1CCCOC1.O=C(Cl)c1ccc2nonc2c1
+
+curr product:                          		O=C(Cc1ccc2ccccc2c1)Nn1nc(N2CCOCC2)c2ccccc2c1=O
+pred template:                          	[#7&a:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>O-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[#7&a:4]-[N&H2&D1&+0:5]
+true template:                          	[#7&a:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>O-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[#7&a:4]-[N&H2&D1&+0:5]
+pred precursor (score = +1.0000):		['Nn1nc(N2CCOCC2)c2ccccc2c1=O.O=C(O)Cc1ccc2ccccc2c1']
+true precursor (score = +1.0000):		Nn1nc(N2CCOCC2)c2ccccc2c1=O.O=C(O)Cc1ccc2ccccc2c1
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		CC(C)c1ccc(CN2CC(Oc3ccc(-c4ccc(C[C@H](NC(=O)OC(C)(C)C)C(=O)N5CCC[C@H]5C#N)c(F)c4)cn3)C2)cc1
+pred template:                          	[C:4]-[N&H0&D3&+0:5](-[C:6])-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>O-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[C:4]-[N&H1&D2&+0:5]-[C:6]
+true template:                          	[#7&a:4]:[c:3]:[c&H0&D3&+0:1](:[c:2])-[c&H0&D3&+0:5](:[c:6]):[c:7]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3]:[#7&a:4].C-C1(-C)-O-B(-[c&H0&D3&+0:5](:[c:6]):[c:7])-O-C-1(-C)-C
+pred precursor (score = +0.9428):		['CC(C)c1ccc(CN2CC(Oc3ccc(-c4ccc(C[C@H](NC(=O)OC(C)(C)C)C(=O)O)c(F)c4)cn3)C2)cc1.N#C[C@@H]1CCCN1']
+true precursor (score = +0.0001):		CC(C)(C)OC(=O)N[C@@H](Cc1ccc(B2OC(C)(C)C(C)(C)O2)cc1F)C(=O)N1CCC[C@H]1C#N.CC(C)c1ccc(CN2CC(Oc3ccc(Br)cn3)C2)cc1
+
+curr product:                          		CCNCC1CCN(c2ccc(N)cc2)CC1
+pred template:                          	[N&H2&D1&+0:1]-[c:2]>>O=[N&+&H0&D3:1](-[O&-])-[c:2]
+true template:                          	[N&H2&D1&+0:1]-[c:2]>>C-C(-C)(-C)-O-C(=O)-[N&H1&D2&+0:1]-[c:2]
+pred precursor (score = +0.9190):		['CCNCC1CCN(c2ccc([N+](=O)[O-])cc2)CC1']
+true precursor (score = +0.0337):		CCNCC1CCN(c2ccc(NC(=O)OC(C)(C)C)cc2)CC1
+
+curr product:                          		CCN(CC)CCCNC(=O)Nc1cc(Oc2ccc(N)cc2C)ccn1
+pred template:                          	[N&H2&D1&+0:1]-[c:2]>>O=[N&+&H0&D3:1](-[O&-])-[c:2]
+true template:                          	[N&H2&D1&+0:1]-[c:2]>>O=[N&+&H0&D3:1](-[O&-])-[c:2]
+pred precursor (score = +0.9994):		['CCN(CC)CCCNC(=O)Nc1cc(Oc2ccc([N+](=O)[O-])cc2C)ccn1']
+true precursor (score = +0.9994):		CCN(CC)CCCNC(=O)Nc1cc(Oc2ccc([N+](=O)[O-])cc2C)ccn1
+
+curr product:                          		CC1(O)CN(C(c2ccccc2)c2ccccc2)C1
+pred template:                          	[O&H0&D1&+0:1]=[C&H0&D3&+0:2]1-[C:3]-[#7:4]-[C:5]-1>>[O&H1&D1&+0:1]-[C&H1&D3&+0:2]1-[C:3]-[#7:4]-[C:5]-1
+true template:                          	[C&H3&D1&+0:1]-[C&H0&D4&+0:3]1(-[O&H1&D1&+0:2])-[C:4]-[#7:5]-[C:6]-1>>[C&H3&D1&+0:1]-[#12&+].[O&H0&D1&+0:2]=[C&H0&D3&+0:3]1-[C:4]-[#7:5]-[C:6]-1
+pred precursor (score = +0.1074):		Template could not be applied
+true precursor (score = +0.0010):		C[Mg+].O=C1CN(C(c2ccccc2)c2ccccc2)C1
+
+curr product:                          		COC(=O)c1ccc2ccccc2c1-c1ccccc1
+pred template:                          	[C&H3&D1&+0:1]-[O&H0&D2&+0:4]-[C:3]=[O&D1&H0:2]>>O-[C&H3&D1&+0:1].[O&D1&H0:2]=[C:3]-[O&H1&D1&+0:4]
+true template:                          	[#8:5]-[C:4](=[O&D1&H0:6])-[c:3]:[c&H0&D3&+0:1](:[c:2])-[c&H0&D3&+0:7](:[c:8]):[c:9]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3]-[C:4](-[#8:5])=[O&D1&H0:6].O-B(-O)-[c&H0&D3&+0:7](:[c:8]):[c:9]
+pred precursor (score = +0.1342):		['CO.O=C(O)c1ccc2ccccc2c1-c1ccccc1']
+true precursor (score = +0.0152):		COC(=O)c1ccc2ccccc2c1Br.OB(O)c1ccccc1
+
+Called a step of ReduceLROnPlateau, current LR: 0.0003
+
+End of epoch: 10,                 
+train loss: 0.0982, train top-1 acc: 0.9821,                 
+train top-2 acc: 0.9965, train top-3 acc: 0.9989,                 
+train top-5 acc: 0.9998, train top-10 acc: 0.9999,                 
+train top-20 acc: 1.0000, train top-50 acc: 1.0000,                 
+valid loss: N/A, valid top-1 acc: 0.4017                 
+valid top-2 acc: 0.5095, valid top-3 acc: 0.5620,                 
+valid top-5 acc: 0.6192, valid top-10 acc: 0.6759,                 
+valid top-20 acc: 0.7110, valid top-50 acc: 0.7466,                 
+valid top-100 acc: 0.7677,             
+
+
+curr product:                          		O=C(Nc1ccc(CCc2ccccn2)nc1)c1ccccc1-c1ccc(C(F)(F)F)cc1
+pred template:                          	[#7&a:1]:[c:2]-[C&H2&D2&+0:3]-[C&H2&D2&+0:4]-[c:5]:[#7&a:6]>>[#7&a:1]:[c:2]-[C&H0&D2&+0:3]#[C&H0&D2&+0:4]-[c:5]:[#7&a:6]
+true template:                          	[#7&a:4]:[c:5]:[c:6]-[N&H1&D2&+0:7]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>Cl-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[#7&a:4]:[c:5]:[c:6]-[N&H2&D1&+0:7]
+pred precursor (score = +0.6918):		['O=C(Nc1ccc(C#Cc2ccccn2)nc1)c1ccccc1-c1ccc(C(F)(F)F)cc1']
+true precursor (score = +0.0017):		Nc1ccc(CCc2ccccn2)nc1.O=C(Cl)c1ccccc1-c1ccc(C(F)(F)F)cc1
+
+curr product:                          		CC(C)COC(=O)c1ccc(OCC(=O)c2ccc3c(c2)C(C)(C)CCC3(C)C)cc1O
+pred template:                          	[O&D1&H0:3]=[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:4]-[c:5]>>Br-[C&H2&D2&+0:1]-[C:2]=[O&D1&H0:3].[O&H1&D1&+0:4]-[c:5]
+true template:                          	[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:5]-[C:4]=[O&D1&H0:3]>>O-[C&H2&D2&+0:1]-[C:2].[O&D1&H0:3]=[C:4]-[O&H1&D1&+0:5]
+pred precursor (score = +0.4065):		['CC(C)COC(=O)c1ccc(O)cc1O.CC1(C)CCC(C)(C)c2cc(C(=O)CBr)ccc21']
+true precursor (score = +0.0884):		CC(C)CO.CC1(C)CCC(C)(C)c2cc(C(=O)COc3ccc(C(=O)O)c(O)c3)ccc21
+
+curr product:                          		O=C(Cc1ccc2ccccc2c1)Nn1nc(N2CCOCC2)c2ccccc2c1=O
+pred template:                          	[#7&a:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>O-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[#7&a:4]-[N&H2&D1&+0:5]
+true template:                          	[#7&a:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3]>>O-[C&H0&D3&+0:1](-[C:2])=[O&D1&H0:3].[#7&a:4]-[N&H2&D1&+0:5]
+pred precursor (score = +1.0000):		['Nn1nc(N2CCOCC2)c2ccccc2c1=O.O=C(O)Cc1ccc2ccccc2c1']
+true precursor (score = +1.0000):		Nn1nc(N2CCOCC2)c2ccccc2c1=O.O=C(O)Cc1ccc2ccccc2c1
+
+curr product:                          		CCCOc1c2c(c(OCCC)c3ccccc13)C(O)N(c1ccc(CC(=O)OCC)cc1C)C2=O
+pred template:                          	[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:3]-[c:4]>>Br-[C&H2&D2&+0:1]-[C:2].[O&H1&D1&+0:3]-[c:4]
+true template:                          	[O&D1&H0:1]=[C:2]-[#7:3]-[C&H1&D3&+0:4](-[O&H1&D1&+0:5])-[c:6]>>[O&D1&H0:1]=[C:2]-[#7:3]-[C&H0&D3&+0:4](=[O&H0&D1&+0:5])-[c:6]
+pred precursor (score = +0.9706):		['CCCBr.CCCOc1c2c(c(O)c3ccccc13)C(=O)N(c1ccc(CC(=O)OCC)cc1C)C2O', 'CCCBr.CCCOc1c2c(c(O)c3ccccc13)C(O)N(c1ccc(CC(=O)OCC)cc1C)C2=O']
+true precursor (score = +0.0000):		CCCOc1c2c(c(OCCC)c3ccccc13)C(=O)N(c1ccc(CC(=O)OCC)cc1C)C2=O
+
+curr product:                          		COc1ncc(-c2ccccc2)cc1CN(c1ccc(Oc2ccc(C)cc2)cc1)S(C)(=O)=O
+pred template:                          	[C:5]-[N&H0&D3&+0:6](-[c:7])-[S&H0&D4&+0:1](-[C&D1&H3:2])(=[O&D1&H0:3])=[O&D1&H0:4]>>Cl-[S&H0&D4&+0:1](-[C&D1&H3:2])(=[O&D1&H0:3])=[O&D1&H0:4].[C:5]-[N&H1&D2&+0:6]-[c:7]
+true template:                          	[#7&a:4]:[c:3]:[c&H0&D3&+0:1](:[c:2])-[c&H0&D3&+0:5](:[c:6]):[c:7]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3]:[#7&a:4].O-B(-O)-[c&H0&D3&+0:5](:[c:6]):[c:7]
+pred precursor (score = +0.5758):		['COc1ncc(-c2ccccc2)cc1CNc1ccc(Oc2ccc(C)cc2)cc1.CS(=O)(=O)Cl']
+true precursor (score = +0.0037):		COc1ncc(Br)cc1CN(c1ccc(Oc2ccc(C)cc2)cc1)S(C)(=O)=O.OB(O)c1ccccc1
+
+curr product:                          		O=C(O)c1ccc(CCCC2CCN(C[C@H]3CN([C@@H](C(=O)O)C4CCCCC4)C[C@@H]3c3ccccc3)CC2)cc1
+pred template:                          	[O&D1&H0:1]=[C:2]-[O&H1&D1&+0:3]>>[O&D1&H0:1]=[C:2]-[O&H0&D2&+0:3]-C-c1:c:c:c:c:c:1
+true template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+pred precursor (score = +0.4965):		['O=C(OCc1ccccc1)c1ccc(CCCC2CCN(C[C@H]3CN([C@@H](C(=O)O)C4CCCCC4)C[C@@H]3c3ccccc3)CC2)cc1', 'O=C(O)c1ccc(CCCC2CCN(C[C@H]3CN([C@@H](C(=O)OCc4ccccc4)C4CCCCC4)C[C@@H]3c3ccccc3)CC2)cc1']
+true precursor (score = +0.4634):		COC(=O)c1ccc(CCCC2CCN(C[C@H]3CN([C@@H](C(=O)O)C4CCCCC4)C[C@@H]3c3ccccc3)CC2)cc1
+
+curr product:                          		CCCCCCCCOc1ccc(-c2cnc(-c3ccc(OCCCCCCCC)c(F)c3F)nc2)cn1
+pred template:                          	[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:3]-[c:4]>>Br-[C&H2&D2&+0:1]-[C:2].[O&H1&D1&+0:3]-[c:4]
+true template:                          	[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:3]-[c:4]>>Br-[C&H2&D2&+0:1]-[C:2].[O&H1&D1&+0:3]-[c:4]
+pred precursor (score = +0.9829):		['CCCCCCCCBr.CCCCCCCCOc1ccc(-c2ncc(-c3ccc(O)nc3)cn2)c(F)c1F', 'CCCCCCCCBr.CCCCCCCCOc1ccc(-c2cnc(-c3ccc(O)c(F)c3F)nc2)cn1']
+true precursor (score = +0.9829):		CCCCCCCCBr.CCCCCCCCOc1ccc(-c2cnc(-c3ccc(O)c(F)c3F)nc2)cn1
+
+curr product:                          		CC(C)OC(=O)Nc1ccc(N)c([N+](=O)[O-])c1
+pred template:                          	[#8:2]-[C&H0&D3&+0:1](=[O&D1&H0:3])-[N&H1&D2&+0:4]-[c:5]>>Cl-[C&H0&D3&+0:1](-[#8:2])=[O&D1&H0:3].[N&H2&D1&+0:4]-[c:5]
+true template:                          	[#8:2]-[C&H0&D3&+0:1](=[O&D1&H0:3])-[N&H1&D2&+0:4]-[c:5]>>Cl-[C&H0&D3&+0:1](-[#8:2])=[O&D1&H0:3].[N&H2&D1&+0:4]-[c:5]
+pred precursor (score = +0.9781):		['CC(C)OC(=O)Cl.Nc1ccc(N)c([N+](=O)[O-])c1']
+true precursor (score = +0.9781):		CC(C)OC(=O)Cl.Nc1ccc(N)c([N+](=O)[O-])c1
+
+curr product:                          		COc1ccccc1CNC1CCc2ccccc2C1Cc1ccccc1
+pred template:                          	[#7:2]-[C&H2&D2&+0:1]-[c:3]>>O=[C&H0&D3&+0:1](-[#7:2])-[c:3]
+true template:                          	[C:2]-[C&H1&D3&+0:1](-[C:3])-[N&H1&D2&+0:5]-[C:4]>>O=[C&H0&D3&+0:1](-[C:2])-[C:3].[C:4]-[N&H2&D1&+0:5]
+pred precursor (score = +0.5159):		['COc1ccccc1C(=O)NC1CCc2ccccc2C1Cc1ccccc1']
+true precursor (score = +0.0597):		COc1ccccc1CN.O=C1CCc2ccccc2C1Cc1ccccc1
+
+curr product:                          		CC(=O)NC(C)Cn1cc(-c2ccccc2)c2ccccc2c1=O
+pred template:                          	[C:2]-[C&H2&D2&+0:1]-[n&H0&D3&+0:4](:[c:3]):[c:5]>>Cl-[C&H2&D2&+0:1]-[C:2].[c:3]:[n&H1&D2&+0:4]:[c:5]
+true template:                          	[C:4]-[N&H1&D2&+0:5]-[C&H0&D3&+0:1](-[C&D1&H3:2])=[O&D1&H0:3]>>O-[C&H0&D3&+0:1](-[C&D1&H3:2])=[O&D1&H0:3].[C:4]-[N&H2&D1&+0:5]
+pred precursor (score = +0.2915):		['CC(=O)NC(C)CCl.O=c1[nH]cc(-c2ccccc2)c2ccccc12']
+true precursor (score = +0.0065):		CC(=O)O.CC(N)Cn1cc(-c2ccccc2)c2ccccc2c1=O
+Traceback (most recent call last):
+  File "train.py", line 184, in train
+    rxn_true_class = labels[rxn_idx]
+IndexError: index 235 is out of bounds for dimension 0 with size 189
+
+
+Index out of range (last minibatch)
+
+Called a step of ReduceLROnPlateau, current LR: 0.0003
+
+End of epoch: 11,                 
+train loss: 0.0893, train top-1 acc: 0.9830,                 
+train top-2 acc: 0.9976, train top-3 acc: 0.9991,                 
+train top-5 acc: 0.9998, train top-10 acc: 1.0000,                 
+train top-20 acc: 1.0000, train top-50 acc: 1.0000,                 
+valid loss: N/A, valid top-1 acc: 0.4021                 
+valid top-2 acc: 0.5083, valid top-3 acc: 0.5624,                 
+valid top-5 acc: 0.6176, valid top-10 acc: 0.6737,                 
+valid top-20 acc: 0.7092, valid top-50 acc: 0.7438,                 
+valid top-100 acc: 0.7671,             
+
+
+curr product:                          		O=C(Nc1ccc(CCc2ccccn2)nc1)c1ccccc1-c1ccc(C(F)(F)F)cc1
+pred template:                          	[#7&a:1]:[c:2]-[C&H2&D2&+0:3]-[C&H2&D2&+0:4]-[c:5]:[#7&a:6]>>[#7&a:1]:[c:2]-[C&H0&D2&+0:3]#[C&H0&D2&+0:4]-[c:5]:[#7&a:6]
+true template:                          	[#7&a:4]:[c:5]:[c:6]-[N&H1&D2&+0:7]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>Cl-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[#7&a:4]:[c:5]:[c:6]-[N&H2&D1&+0:7]
+pred precursor (score = +0.7210):		['O=C(Nc1ccc(C#Cc2ccccn2)nc1)c1ccccc1-c1ccc(C(F)(F)F)cc1']
+true precursor (score = +0.0015):		Nc1ccc(CCc2ccccn2)nc1.O=C(Cl)c1ccccc1-c1ccc(C(F)(F)F)cc1
+
+curr product:                          		CCCN(CC1CCNCC1)C1CCc2ccc([N+](=O)[O-])cc2C1
+pred template:                          	[C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
+true template:                          	[C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
+pred precursor (score = +0.9777):		['CCCN(CC1CCN(C(=O)OC(C)(C)C)CC1)C1CCc2ccc([N+](=O)[O-])cc2C1']
+true precursor (score = +0.9777):		CCCN(CC1CCN(C(=O)OC(C)(C)C)CC1)C1CCc2ccc([N+](=O)[O-])cc2C1
+
+curr product:                          		Cc1nn(C(C)c2cc(Cl)c(C#N)c3c2OCCN(C2CN(CCO)C2)C3)c2ncnc(N)c12
+pred template:                          	[C:3]-[N&H0&D3&+0:4](-[C:5])-[C&H2&D2&+0:1]-[C:2]>>Br-[C&H2&D2&+0:1]-[C:2].[C:3]-[N&H1&D2&+0:4]-[C:5]
+true template:                          	[C:3]-[N&H0&D3&+0:4](-[C:5])-[C&H2&D2&+0:1]-[C:2]>>Br-[C&H2&D2&+0:1]-[C:2].[C:3]-[N&H1&D2&+0:4]-[C:5]
+pred precursor (score = +0.9891):		['Cc1nn(C(C)c2cc(Cl)c(C#N)c(CNC3CN(CCO)C3)c2OCCBr)c2ncnc(N)c12', 'Cc1nn(C(C)c2cc(Cl)c(C#N)c3c2OCCN(C(CBr)CNCCO)C3)c2ncnc(N)c12', 'Cc1nn(C(C)c2cc(Cl)c(C#N)c3c2OCCN(C2CNC2)C3)c2ncnc(N)c12.OCCBr']
+true precursor (score = +0.9891):		Cc1nn(C(C)c2cc(Cl)c(C#N)c3c2OCCN(C2CNC2)C3)c2ncnc(N)c12.OCCBr
+
+curr product:                          		Cc1c(F)ccc(N)c1Nc1ccccn1
+pred template:                          	[N&H2&D1&+0:1]-[c:2]>>O=[N&+&H0&D3:1](-[O&-])-[c:2]
+true template:                          	[N&H2&D1&+0:1]-[c:2]>>O=[N&+&H0&D3:1](-[O&-])-[c:2]
+pred precursor (score = +0.9904):		['Cc1c(F)ccc([N+](=O)[O-])c1Nc1ccccn1']
+true precursor (score = +0.9904):		Cc1c(F)ccc([N+](=O)[O-])c1Nc1ccccn1
+
+curr product:                          		COc1nc(N2CCNC2=O)nc(OC)c1N
+pred template:                          	[#7&a:4]:[c:3]:[c:2](-[N&H2&D1&+0:1]):[c:5]:[#7&a:6]>>O=[N&+&H0&D3:1](-[O&-])-[c:2](:[c:3]:[#7&a:4]):[c:5]:[#7&a:6]
+true template:                          	[#7&a:4]:[c:3]:[c:2](-[N&H2&D1&+0:1]):[c:5]:[#7&a:6]>>O=[N&+&H0&D3:1](-[O&-])-[c:2](:[c:3]:[#7&a:4]):[c:5]:[#7&a:6]
+pred precursor (score = +0.1685):		['COc1nc(N2CCNC2=O)nc(OC)c1[N+](=O)[O-]']
+true precursor (score = +0.1685):		COc1nc(N2CCNC2=O)nc(OC)c1[N+](=O)[O-]
+
+curr product:                          		Cc1c(Br)cccc1CNc1ncc([N+](=O)[O-])c(NCC2CCN(C(=O)OC(C)(C)C)CC2)n1
+pred template:                          	[#7&a:2]:[c&H0&D3&+0:1](:[#7&a:3])-[N&H1&D2&+0:5]-[C:4]>>Cl-[c&H0&D3&+0:1](:[#7&a:2]):[#7&a:3].[C:4]-[N&H2&D1&+0:5]
+true template:                          	[#7&a:2]:[c&H0&D3&+0:1](:[#7&a:3])-[N&H1&D2&+0:5]-[C:4]>>Cl-[c&H0&D3&+0:1](:[#7&a:2]):[#7&a:3].[C:4]-[N&H2&D1&+0:5]
+pred precursor (score = +0.9895):		['CC(C)(C)OC(=O)N1CCC(CNc2nc(Cl)ncc2[N+](=O)[O-])CC1.Cc1c(Br)cccc1CN']
+true precursor (score = +0.9895):		CC(C)(C)OC(=O)N1CCC(CNc2nc(Cl)ncc2[N+](=O)[O-])CC1.Cc1c(Br)cccc1CN
+
+curr product:                          		CCc1cccc(CC)c1CNc1cccn2c(C)c(C)nc12
+pred template:                          	[#7&a:3]:[c:4](:[#7&a:5]):[c:6]-[N&H1&D2&+0:7]-[C&H2&D2&+0:1]-[c:2]>>O=[C&H1&D2&+0:1]-[c:2].[#7&a:3]:[c:4](:[#7&a:5]):[c:6]-[N&H2&D1&+0:7]
+true template:                          	[#7&a:3]:[c:4](:[#7&a:5]):[c:6]-[N&H1&D2&+0:7]-[C&H2&D2&+0:1]-[c:2]>>O=[C&H1&D2&+0:1]-[c:2].[#7&a:3]:[c:4](:[#7&a:5]):[c:6]-[N&H2&D1&+0:7]
+pred precursor (score = +0.6858):		['CCc1cccc(CC)c1C=O.Cc1nc2c(N)cccn2c1C']
+true precursor (score = +0.6858):		CCc1cccc(CC)c1C=O.Cc1nc2c(N)cccn2c1C
+
+curr product:                          		O=C(NC(=O)c1c(F)cccc1F)Nc1cc(Cl)c(OCC(F)(F)F)cc1F
+pred template:                          	[O&D1&H0:3]=[C&H0&D3&+0:4](-[N&H1&D2&+0:5]-[C:6]=[O&D1&H0:7])-[N&H1&D2&+0:1]-[c:2]>>[N&H2&D1&+0:1]-[c:2].[O&D1&H0:3]=[C&H0&D2&+0:4]=[N&H0&D2&+0:5]-[C:6]=[O&D1&H0:7]
+true template:                          	[O&D1&H0:3]=[C&H0&D3&+0:4](-[N&H1&D2&+0:5]-[C:6]=[O&D1&H0:7])-[N&H1&D2&+0:1]-[c:2]>>[N&H2&D1&+0:1]-[c:2].[O&D1&H0:3]=[C&H0&D2&+0:4]=[N&H0&D2&+0:5]-[C:6]=[O&D1&H0:7]
+pred precursor (score = +0.9880):		['Nc1cc(Cl)c(OCC(F)(F)F)cc1F.O=C=NC(=O)c1c(F)cccc1F']
+true precursor (score = +0.9880):		Nc1cc(Cl)c(OCC(F)(F)F)cc1F.O=C=NC(=O)c1c(F)cccc1F
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+Called a step of ReduceLROnPlateau, current LR: 0.0003
+
+Increase in valid acc < early stop min delta 0.0001,                     
+patience count: 1                     
+
+
+End of epoch: 12,                 
+train loss: 0.0821, train top-1 acc: 0.9850,                 
+train top-2 acc: 0.9979, train top-3 acc: 0.9993,                 
+train top-5 acc: 0.9999, train top-10 acc: 1.0000,                 
+train top-20 acc: 1.0000, train top-50 acc: 1.0000,                 
+valid loss: N/A, valid top-1 acc: 0.3983                 
+valid top-2 acc: 0.5107, valid top-3 acc: 0.5632,                 
+valid top-5 acc: 0.6168, valid top-10 acc: 0.6741,                 
+valid top-20 acc: 0.7094, valid top-50 acc: 0.7444,                 
+valid top-100 acc: 0.7673,             
+
+
+curr product:                          		Cc1cc2c(c(C)c1NC(=O)Oc1ccc([N+](=O)[O-])cc1)c1ccccc1n2C(C)C
+pred template:                          	[#8:2]-[C&H0&D3&+0:1](=[O&D1&H0:3])-[N&H1&D2&+0:4]-[c:5]>>Cl-[C&H0&D3&+0:1](-[#8:2])=[O&D1&H0:3].[N&H2&D1&+0:4]-[c:5]
+true template:                          	[#8:2]-[C&H0&D3&+0:1](=[O&D1&H0:3])-[N&H1&D2&+0:4]-[c:5]>>Cl-[C&H0&D3&+0:1](-[#8:2])=[O&D1&H0:3].[N&H2&D1&+0:4]-[c:5]
+pred precursor (score = +0.9922):		['Cc1cc2c(c(C)c1N)c1ccccc1n2C(C)C.O=C(Cl)Oc1ccc([N+](=O)[O-])cc1']
+true precursor (score = +0.9922):		Cc1cc2c(c(C)c1N)c1ccccc1n2C(C)C.O=C(Cl)Oc1ccc([N+](=O)[O-])cc1
+
+curr product:                          		C[C@H]1CN(Cc2ccccc2)C[C@@H](C)N1
+pred template:                          	[C:3]-[N&H0&D3&+0:4](-[C:5])-[C&H2&D2&+0:1]-[c:2]>>O=[C&H1&D2&+0:1]-[c:2].[C:3]-[N&H1&D2&+0:4]-[C:5]
+true template:                          	[C:3]-[N&H0&D3&+0:4](-[C:5])-[C&H2&D2&+0:1]-[c:2]>>Br-[C&H2&D2&+0:1]-[c:2].[C:3]-[N&H1&D2&+0:4]-[C:5]
+pred precursor (score = +0.9355):		['C[C@H]1CNC[C@@H](C)N1.O=Cc1ccccc1']
+true precursor (score = +0.0029):		BrCc1ccccc1.C[C@H]1CNC[C@@H](C)N1
+
+curr product:                          		COc1cccc2c1cc(C(=O)Nc1ccc(-c3nc([C@H]4CC[C@H](N5CCN(C)CC5)CC4)n4ccnc(C)c34)cc1O)n2C
+pred template:                          	[#7&a:7]:[c:6]:[c:5]1:[#7&a:4]:[c:3]:[#7&a:2]:[c&H0&D3&+0:1]:1-[c&H0&D3&+0:8](:[c:9]):[c:10]>>Br-[c&H0&D3&+0:1]1:[#7&a:2]:[c:3]:[#7&a:4]:[c:5]:1:[c:6]:[#7&a:7].C-C1(-C)-O-B(-[c&H0&D3&+0:8](:[c:9]):[c:10])-O-C-1(-C)-C
+true template:                          	[#7&a:4]:[c:3]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[N&H1&D2&+0:5]-[c:6]>>Cl-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]:[#7&a:4].[N&H2&D1&+0:5]-[c:6]
+pred precursor (score = +0.7394):		['COc1cccc2c1cc(C(=O)Nc1ccc(B3OC(C)(C)C(C)(C)O3)cc1O)n2C.Cc1nccn2c1c(Br)nc2[C@H]1CC[C@H](N2CCN(C)CC2)CC1']
+true precursor (score = +0.0000):		COc1cccc2c1cc(C(=O)Cl)n2C.Cc1nccn2c1c(-c1ccc(N)c(O)c1)nc2[C@H]1CC[C@H](N2CCN(C)CC2)CC1
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		COc1cccc([C@H]2O[C@H](CCO)c3ccc(CC(C)C)n3-c3ccc(Cl)cc32)c1OC
+pred template:                          	[C:2]-[C&H2&D2&+0:1]-[O&H1&D1&+0:3]>>C-O-[C&H0&D3&+0:1](-[C:2])=[O&H0&D1&+0:3]
+true template:                          	[C:2]-[C&H2&D2&+0:1]-[O&H1&D1&+0:3]>>C-O-[C&H0&D3&+0:1](-[C:2])=[O&H0&D1&+0:3]
+pred precursor (score = +0.9992):		['COC(=O)C[C@H]1O[C@H](c2cccc(OC)c2OC)c2cc(Cl)ccc2-n2c(CC(C)C)ccc21']
+true precursor (score = +0.9992):		COC(=O)CC1OC(c2cccc(OC)c2OC)c2cc(Cl)ccc2-n2c(CC(C)C)ccc21
+
+curr product:                          		c1cc(COc2ccc(OCc3ccc4ccccc4n3)cc2)cc(OCc2nnn[nH]2)c1
+pred template:                          	[C:1]-[c&H0&D3&+0:2]1:[n&H0&D2&+0:3]:[n&H0&D2&+0:4]:[n&H0&D2&+0:5]:[n&H1&D2&+0:6]:1>>[C:1]-[C&H0&D2&+0:2]#[N&H0&D1&+0:3].[N&-&H0&D1:4]=[N&+&H0&D2:5]=[N&-&H0&D1:6]
+true template:                          	[C:1]-[c&H0&D3&+0:2]1:[n&H0&D2&+0:3]:[n&H0&D2&+0:4]:[n&H0&D2&+0:5]:[n&H1&D2&+0:6]:1>>[C:1]-[C&H0&D2&+0:2]#[N&H0&D1&+0:3].[N&-&H0&D1:4]=[N&+&H0&D2:5]=[N&-&H0&D1:6]
+pred precursor (score = +0.7238):		['N#CCOc1cccc(COc2ccc(OCc3ccc4ccccc4n3)cc2)c1.[N-]=[N+]=[N-]']
+true precursor (score = +0.7238):		N#CCOc1cccc(COc2ccc(OCc3ccc4ccccc4n3)cc2)c1.[N-]=[N+]=[N-]
+
+curr product:                          		Cc1cc2c(OCc3ccccc3)cccc2n1Cc1ccccc1
+pred template:                          	[c:3]:[n&H0&D3&+0:4](:[c:5])-[C&H2&D2&+0:1]-[c:2]>>Cl-[C&H2&D2&+0:1]-[c:2].[c:3]:[n&H1&D2&+0:4]:[c:5]
+true template:                          	[c:4]-[O&H0&D2&+0:3]-[C&H2&D2&+0:1]-[c:2]>>Br-[C&H2&D2&+0:1]-[c:2].[O&H1&D1&+0:3]-[c:4]
+pred precursor (score = +0.8045):		['Cc1cc2c(OCc3ccccc3)cccc2[nH]1.ClCc1ccccc1']
+true precursor (score = +0.0321):		BrCc1ccccc1.Cc1cc2c(O)cccc2n1Cc1ccccc1
+
+Called a step of ReduceLROnPlateau, current LR: 8.999999999999999e-05
+
+Increase in valid acc < early stop min delta 0.0001,                     
+patience count: 2                     
+
+
+End of epoch: 13,                 
+train loss: 0.0755, train top-1 acc: 0.9860,                 
+train top-2 acc: 0.9981, train top-3 acc: 0.9994,                 
+train top-5 acc: 0.9999, train top-10 acc: 1.0000,                 
+train top-20 acc: 1.0000, train top-50 acc: 1.0000,                 
+valid loss: N/A, valid top-1 acc: 0.4003                 
+valid top-2 acc: 0.5103, valid top-3 acc: 0.5628,                 
+valid top-5 acc: 0.6170, valid top-10 acc: 0.6741,                 
+valid top-20 acc: 0.7092, valid top-50 acc: 0.7440,                 
+valid top-100 acc: 0.7673,             
+
+
+curr product:                          		N#Cc1cnc2cc3ccc(O)cc3cc2c1Nc1ccc(Cl)cc1Cl
+pred template:                          	[c:8]-[N&H1&D2&+0:7]-[c&H0&D3&+0:1]1:[c:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1>>Cl-[c&H0&D3&+0:1]1:[c:2]:[c:3]:[#7&a:4]:[c:5]:[c:6]:1.[N&H2&D1&+0:7]-[c:8]
+true template:                          	[O&H1&D1&+0:1]-[c:2]>>C-[O&H0&D2&+0:1]-[c:2]
+pred precursor (score = +0.9995):		['N#Cc1cnc2cc3ccc(O)cc3cc2c1Cl.Nc1ccc(Cl)cc1Cl']
+true precursor (score = +0.0000):		COc1ccc2cc3ncc(C#N)c(Nc4ccc(Cl)cc4Cl)c3cc2c1
+
+curr product:                          		CC(C)(CCCN1CCN(c2cccc(Cl)c2Cl)CC1)Oc1ccc2c(n1)NC(=O)CC2
+pred template:                          	[C:3]-[N&H0&D3&+0:4](-[C:5])-[C&H2&D2&+0:1]-[C:2]>>O=[C&H1&D2&+0:1]-[C:2].[C:3]-[N&H1&D2&+0:4]-[C:5]
+true template:                          	[C:3]-[N&H0&D3&+0:4](-[C:5])-[C&H2&D2&+0:1]-[C:2]>>O=[C&H1&D2&+0:1]-[C:2].[C:3]-[N&H1&D2&+0:4]-[C:5]
+pred precursor (score = +0.9979):		['CC(C)(CCC=O)Oc1ccc2c(n1)NC(=O)CC2.Clc1cccc(N2CCNCC2)c1Cl', 'CC(C)(CCCNCCN(CC=O)c1cccc(Cl)c1Cl)Oc1ccc2c(n1)NC(=O)CC2']
+true precursor (score = +0.9979):		CC(C)(CCC=O)Oc1ccc2c(n1)NC(=O)CC2.Clc1cccc(N2CCNCC2)c1Cl
+
+curr product:                          		Oc1cccc2c1Oc1ccccc1C21CCN(Cc2ccccc2)CC1
+pred template:                          	[O&H1&D1&+0:1]-[c:2]>>C-C(=O)-[O&H0&D2&+0:1]-[c:2]
+true template:                          	[O&H1&D1&+0:1]-[c:2]>>C-[O&H0&D2&+0:1]-[c:2]
+pred precursor (score = +0.7102):		['CC(=O)Oc1cccc2c1Oc1ccccc1C21CCN(Cc2ccccc2)CC1']
+true precursor (score = +0.2232):		COc1cccc2c1Oc1ccccc1C21CCN(Cc2ccccc2)CC1
+
+curr product:                          		COc1cc(C(=O)N2CCC(CCO)(c3ccc(Cl)c(Cl)c3)C2)cc(OC)c1OC
+pred template:                          	[C:4]-[N&H0&D3&+0:5](-[C:6])-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>Cl-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[C:4]-[N&H1&D2&+0:5]-[C:6]
+true template:                          	[C:4]-[N&H0&D3&+0:5](-[C:6])-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3]>>Cl-[C&H0&D3&+0:1](=[O&D1&H0:2])-[c:3].[C:4]-[N&H1&D2&+0:5]-[C:6]
+pred precursor (score = +0.8413):		['COc1cc(C(=O)Cl)cc(OC)c1OC.OCCC1(c2ccc(Cl)c(Cl)c2)CCNC1']
+true precursor (score = +0.8413):		COc1cc(C(=O)Cl)cc(OC)c1OC.OCCC1(c2ccc(Cl)c(Cl)c2)CCNC1
+
+curr product:                          		COCc1cccc(-c2ccc(C(C)(C)C(=O)O)cc2OC)c1
+pred template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+true template:                          	[O&D1&H0:3]=[C:2]-[O&H1&D1&+0:1]>>C-C-[O&H0&D2&+0:1]-[C:2]=[O&D1&H0:3]
+pred precursor (score = +0.8962):		['COCc1cccc(-c2ccc(C(C)(C)C(=O)OC)cc2OC)c1']
+true precursor (score = +0.0936):		CCOC(=O)C(C)(C)c1ccc(-c2cccc(COC)c2)c(OC)c1
+Traceback (most recent call last):
+  File "train.py", line 187, in train
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		C=CCc1cc(-c2ccccc2C)ccc1OCc1ccccc1
+pred template:                          	[c:4]-[O&H0&D2&+0:3]-[C&H2&D2&+0:1]-[c:2]>>Br-[C&H2&D2&+0:1]-[c:2].[O&H1&D1&+0:3]-[c:4]
+true template:                          	[c:4]-[O&H0&D2&+0:3]-[C&H2&D2&+0:1]-[c:2]>>Br-[C&H2&D2&+0:1]-[c:2].[O&H1&D1&+0:3]-[c:4]
+pred precursor (score = +0.9461):		['BrCc1ccccc1.C=CCc1cc(-c2ccccc2C)ccc1O']
+true precursor (score = +0.9461):		BrCc1ccccc1.C=CCc1cc(-c2ccccc2C)ccc1O
+
+curr product:                          		CC(C)(C)n1ncc2c1C(=O)NC1(CCNCC1)C2
+pred template:                          	[C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
+true template:                          	[C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
+pred precursor (score = +0.9183):		['CC(C)(C)OC(=O)N1CCC2(CC1)Cc1cnn(C(C)(C)C)c1C(=O)N2', 'CC(C)(C)OC(=O)N1C(=O)c2c(cnn2C(C)(C)C)CC12CCNCC2']
+true precursor (score = +0.9183):		CC(C)(C)OC(=O)N1CCC2(CC1)Cc1cnn(C(C)(C)C)c1C(=O)N2
+Traceback (most recent call last):
+  File "train.py", line 184, in train
+    rxn_true_class = labels[rxn_idx]
+IndexError: index 281 is out of bounds for dimension 0 with size 189
+
+
+Index out of range (last minibatch)
+
+Called a step of ReduceLROnPlateau, current LR: 8.999999999999999e-05
+
+Early stopped at the end of epoch: 14,                 
+train loss: 0.0661, train top-1 acc: 0.9886,                 
+train top-2 acc: 0.9983, train top-3 acc: 0.9995,                 
+train top-5 acc: 0.9999, train top-10 acc: 1.0000,                 
+train top-20 acc: 1.0000, train top-50 acc: 1.0000,                 
+valid loss: N/A, valid top-1 acc: 0.4005                 
+valid top-2 acc: 0.5119, valid top-3 acc: 0.5630,                 
+valid top-5 acc: 0.6166, valid top-10 acc: 0.6729,                 
+valid top-20 acc: 0.7106, valid top-50 acc: 0.7440,                 
+valid top-100 acc: 0.7675,                 
+
+Finished training, total time (minutes): 4.110642906030019
+Loading templates from file: 50k_training_templates
+Total number of template patterns: 10198
+Loading pre-computed product fingerprints...
+Loading labels...
+
+curr product:                          		COC(=O)c1cccc2[nH]c(NCC3CCNCC3)nc12
+pred template:                          	[C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
+true template:                          	[C:2]-[N&H1&D2&+0:1]-[C:3]>>C-C(-C)(-C)-O-C(=O)-[N&H0&D3&+0:1](-[C:2])-[C:3]
+pred precursor (score = +0.9984):		['COC(=O)c1cccc2[nH]c(NCC3CCN(C(=O)OC(C)(C)C)CC3)nc12']
+true precursor (score = +0.9984):		COC(=O)c1cccc2[nH]c(NCC3CCN(C(=O)OC(C)(C)C)CC3)nc12
+
+curr product:                          		CC(C)(C)OC(=O)N1CC[C@H](NC(=O)C(F)(F)F)C1
+pred template:                          	[C:7]-[N&H1&D2&+0:8]-[C&H0&D3&+0:1](=[O&D1&H0:2])-[C:3](-[F&D1&H0:4])(-[F&D1&H0:5])-[F&D1&H0:6]>>F-C(-F)(-F)-C(=O)-O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[C:3](-[F&D1&H0:4])(-[F&D1&H0:5])-[F&D1&H0:6].[C:7]-[N&H2&D1&+0:8]
+true template:                          	[C:8]-[N&H0&D3&+0:9](-[C:10])-[C&H0&D3&+0:1](=[O&D1&H0:2])-[#8:3]-[C:4](-[C&D1&H3:5])(-[C&D1&H3:6])-[C&D1&H3:7]>>C-C(-C)(-C)-O-C(=O)-O-[C&H0&D3&+0:1](=[O&D1&H0:2])-[#8:3]-[C:4](-[C&D1&H3:5])(-[C&D1&H3:6])-[C&D1&H3:7].[C:8]-[N&H1&D2&+0:9]-[C:10]
+pred precursor (score = +0.7205):		['CC(C)(C)OC(=O)N1CC[C@H](N)C1.O=C(OC(=O)C(F)(F)F)C(F)(F)F']
+true precursor (score = +0.0062):		CC(C)(C)OC(=O)OC(=O)OC(C)(C)C.O=C(N[C@H]1CCNC1)C(F)(F)F
+
+curr product:                          		c1ccc2c(c1)c(-c1cc3nccnc3[nH]1)cn2CCCN1CCOCC1
+pred template:                          	[C:2]-[C&H2&D2&+0:1]-[n&H0&D3&+0:4](:[c:3]):[c:5]>>Cl-[C&H2&D2&+0:1]-[C:2].[c:3]:[n&H1&D2&+0:4]:[c:5]
+true template:                          	[C:3]-[N&H0&D3&+0:4](-[C:5])-[C&H2&D2&+0:1]-[C:2]>>Br-[C&H2&D2&+0:1]-[C:2].[C:3]-[N&H1&D2&+0:4]-[C:5]
+pred precursor (score = +0.7456):		['ClCCCN1CCOCC1.c1ccc2c(-c3cc4nccnc4[nH]3)c[nH]c2c1']
+true precursor (score = +0.0011):		BrCCCn1cc(-c2cc3nccnc3[nH]2)c2ccccc21.C1COCCN1
+
+curr product:                          		CCOC(C#Cc1cncc(S(C)(=O)=O)c1)(OCC)OCC
+pred template:                          	[#7&a:4]:[c:3]:[c&H0&D3&+0:1](:[c:2])-[C&H0&D2&+0:6]#[C:5]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3]:[#7&a:4].[C:5]#[C&H1&D1&+0:6]
+true template:                          	[#7&a:4]:[c:3]:[c&H0&D3&+0:1](:[c:2])-[C&H0&D2&+0:6]#[C:5]>>Br-[c&H0&D3&+0:1](:[c:2]):[c:3]:[#7&a:4].[C:5]#[C&H1&D1&+0:6]
+pred precursor (score = +0.2129):		['C#CC(OCC)(OCC)OCC.CS(=O)(=O)c1cncc(Br)c1']
+true precursor (score = +0.2129):		C#CC(OCC)(OCC)OCC.CS(=O)(=O)c1cncc(Br)c1
+
+curr product:                          		O[C@H]1C[C@H](C(c2ccccc2)c2ccccc2)OC[C@@H]1NCc1ccc2[nH]ccc2c1
+pred template:                          	[C:3]-[N&H1&D2&+0:4]-[C&H2&D2&+0:1]-[c:2]>>O=[C&H1&D2&+0:1]-[c:2].[C:3]-[N&H2&D1&+0:4]
+true template:                          	[C:3]-[N&H1&D2&+0:4]-[C&H2&D2&+0:1]-[c:2]>>O=[C&H1&D2&+0:1]-[c:2].[C:3]-[N&H2&D1&+0:4]
+pred precursor (score = +0.9618):		['N[C@H]1CO[C@@H](C(c2ccccc2)c2ccccc2)C[C@@H]1O.O=Cc1ccc2[nH]ccc2c1']
+true precursor (score = +0.9618):		N[C@H]1CO[C@@H](C(c2ccccc2)c2ccccc2)C[C@@H]1O.O=Cc1ccc2[nH]ccc2c1
+Traceback (most recent call last):
+  File "train.py", line 353, in test
+    rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
+IndexError: index 10198 is out of bounds for dimension 1 with size 10198
+
+
+Index out of range (last minibatch)
+
+curr product:                          		COc1ccc(I)c(OCC2CO2)c1
+pred template:                          	[#8:3]-[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:4]-[c:5]>>Cl-[C&H2&D2&+0:1]-[C:2]-[#8:3].[O&H1&D1&+0:4]-[c:5]
+true template:                          	[#8:3]-[C:2]-[C&H2&D2&+0:1]-[O&H0&D2&+0:4]-[c:5]>>Cl-[C&H2&D2&+0:1]-[C:2]-[#8:3].[O&H1&D1&+0:4]-[c:5]
+pred precursor (score = +0.9820):		['COc1ccc(I)c(O)c1.ClCC1CO1']
+true precursor (score = +0.9820):		COc1ccc(I)c(O)c1.ClCC1CO1
+
+curr product:                          		O=C1C2=C(CCCC2)C(=O)N1c1ccc(O)cc1F
+pred template:                          	[O&D1&H0:3]=[C&H0&D3&+0:4]1-[C:8]=[C:7]-[C&H0&D3&+0:5](=[O&D1&H0:6])-[N&H0&D3&+0:1]-1-[c:2]>>[N&H2&D1&+0:1]-[c:2].[O&D1&H0:3]=[C&H0&D3&+0:4]1-O-[C&H0&D3&+0:5](=[O&D1&H0:6])-[C:7]=[C:8]-1
+true template:                          	[O&D1&H0:3]=[C&H0&D3&+0:4]1-[C:8]=[C:7]-[C&H0&D3&+0:5](=[O&D1&H0:6])-[N&H0&D3&+0:1]-1-[c:2]>>[N&H2&D1&+0:1]-[c:2].[O&D1&H0:3]=[C&H0&D3&+0:4]1-O-[C&H0&D3&+0:5](=[O&D1&H0:6])-[C:7]=[C:8]-1
+pred precursor (score = +0.9569):		['Nc1ccc(O)cc1F.O=C1OC(=O)C2=C1CCCC2']
+true precursor (score = +0.9569):		Nc1ccc(O)cc1F.O=C1OC(=O)C2=C1CCCC2
+     
+test top-1 acc: 0.4028     
+test top-2 acc: 0.5129, test top-3 acc: 0.5670,     
+test top-5 acc: 0.6206, test top-10 acc: 0.6743,     
+test top-20 acc: 0.7151, test top-50 acc: 0.7508,     
+test top-100 acc: 0.7678,     
+
+Finished Testing
