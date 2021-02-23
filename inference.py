@@ -110,6 +110,8 @@ def compile_into_csv(args):
 
     for phase in args.phases:
         # load mapped_rxn_smi & get precursors & prod_smi
+        with open(DATA_FOLDER / f'{input_file_prefix}_{phase}.pickle', 'rb') as f:
+            clean_rxnsmis[phase] = pickle.load(f)
 
         # load predictions npy files
         preds = np.load(DATA_FOLDER / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{phase}")
