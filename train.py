@@ -1,4 +1,3 @@
-
 import csv
 import sys
 import logging
@@ -39,7 +38,6 @@ def seed_everything(seed: Optional[int] = 0) -> None:
     logging.info(f"Using seed: {seed}\n")
 
 def train(args):
-    # TODO: reloading from checkpoint
     seed_everything(args.random_seed)
 
     logging.info(f'Loading templates from file: {args.templates_file}')
@@ -53,7 +51,7 @@ def train(args):
     logging.info(f'Total number of template patterns: {len(templates_filtered)}')
 
     model = TemplateNN(
-        output_size=len(templates_filtered)+1, # TODO: use len(templates_filtered) and then do masking at valid/test time?? but problem is 2/3 train rxn failed template matching
+        output_size=len(templates_filtered),
         size=args.hidden_size,
         num_layers_body=args.depth,
         input_size=args.fp_size
@@ -95,7 +93,7 @@ def train(args):
                 )
     
     train_losses, valid_losses = [], []
-    k_to_calc = [1, 2, 3, 5, 10, 20, 50]
+    k_to_calc = [1, 2, 3, 5, 10, 20, 50, 100]
     train_accs, val_accs = defaultdict(list), defaultdict(list)
     max_valid_acc = float('-inf')
     wait = 0 # early stopping patience counter
@@ -104,13 +102,22 @@ def train(args):
         train_loss, train_correct, train_seen = 0, defaultdict(int), 0
         train_loader = tqdm(train_loader, desc='training')
         model.train()
-        for i, data in enumerate(train_loader):
+        for data in train_loader:
             inputs, labels, idxs = data
             inputs, labels = inputs.to(device), labels.to(device)
 
             model.zero_grad()
             optimizer.zero_grad()
             outputs = model(inputs)
+            # mask out rxn_smi w/ no valid template, giving loss = 0
+            # logging.info(f'{outputs.shape}, {idxs.shape}, {(idxs < len(templates_filtered)).shape}')
+            # [300, 10198], [300], [300]
+            outputs = torch.where(
+                (labels.view(-1, 1).expand_as(outputs) < len(templates_filtered)), outputs, torch.tensor([0.], device=outputs.device)
+            )
+            labels = torch.where(
+                (labels < len(templates_filtered)), labels, torch.tensor([0.], device=labels.device).long()
+            )
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -143,9 +150,18 @@ def train(args):
                 inputs, labels = inputs.to(device), labels.to(device)
 
                 outputs = model(inputs)
-                loss = criterion(outputs, labels)
+                # we cannot mask both output & label to 0 (artificially inflate acc & deflate loss)
+                # maybe we can mask output to 0 & label to 1
+                # for now I will just not calculate loss since it's not that important
+                # outputs = torch.where(
+                #     (labels.view(-1, 1).expand_as(outputs) < len(templates_filtered)), outputs, torch.tensor([0.], device=outputs.device)
+                # )
+                # labels = torch.where(
+                #     (labels < len(templates_filtered)), labels, torch.tensor([0.], device=labels.device).long()
+                # )
+                # loss = criterion(outputs, labels)
 
-                valid_loss += loss.item()
+                # valid_loss += loss.item()
                 valid_seen += labels.shape[0]
                 outputs = nn.Softmax(dim=-1)(outputs)
 
@@ -154,7 +170,7 @@ def train(args):
                     # logging.info(f'batch_preds: {batch_preds.shape}, labels: {labels.shape}')
                     valid_correct[k] += torch.where(batch_preds == labels.view(-1,1).expand_as(batch_preds))[0].shape[0]
 
-                valid_loader.set_description(f"validating: loss={valid_loss/valid_seen:.4f}, top-1 acc={valid_correct[1]/valid_seen:.4f}")
+                valid_loader.set_description(f"validating: top-1 acc={valid_correct[1]/valid_seen:.4f}") # loss={valid_loss/valid_seen:.4f}, 
                 valid_loader.refresh()
 
                 # display some examples + model predictions/labels for monitoring model generalization
@@ -201,7 +217,7 @@ def train(args):
                     logging.info("".join(tb_str))
                     logging.info('\nIndex out of range (last minibatch)')
 
-        valid_losses.append(valid_loss/valid_seen)
+        # valid_losses.append(valid_loss/valid_seen)
         for k in k_to_calc:
             val_accs[k].append(valid_correct[k]/valid_seen)
 
@@ -220,7 +236,7 @@ def train(args):
             }
             checkpoint_filename = (
                 CHECKPOINT_FOLDER
-                / f"{args.expt_name}_{epoch:04d}.pth.tar"
+                / f"{args.expt_name}.pth.tar" # _{epoch:04d}
             )
             torch.save(checkpoint_dict, checkpoint_filename)
 
@@ -231,12 +247,13 @@ def train(args):
                 \ntrain top-2 acc: {train_accs[2][-1]:.4f}, train top-3 acc: {train_accs[3][-1]:.4f}, \
                 \ntrain top-5 acc: {train_accs[5][-1]:.4f}, train top-10 acc: {train_accs[10][-1]:.4f}, \
                 \ntrain top-20 acc: {train_accs[20][-1]:.4f}, train top-50 acc: {train_accs[50][-1]:.4f}, \
-                \nvalid loss: {valid_losses[-1]:.4f}, valid top-1 acc: {val_accs[1][-1]:.4f} \
+                \nvalid loss: N/A, valid top-1 acc: {val_accs[1][-1]:.4f} \
                 \nvalid top-2 acc: {val_accs[2][-1]:.4f}, valid top-3 acc: {val_accs[3][-1]:.4f}, \
                 \nvalid top-5 acc: {val_accs[5][-1]:.4f}, valid top-10 acc: {val_accs[10][-1]:.4f}, \
                 \nvalid top-20 acc: {val_accs[20][-1]:.4f}, valid top-50 acc: {val_accs[50][-1]:.4f}, \
-                \n"
-                logging.info(message)
+                \nvalid top-100 acc: {val_accs[100][-1]:.4f}, \
+                \n" # valid_losses[-1]:.4f}
+                logging.info(message) 
                 break
             else:
                 wait += 1
@@ -254,11 +271,12 @@ def train(args):
                 \ntrain top-2 acc: {train_accs[2][-1]:.4f}, train top-3 acc: {train_accs[3][-1]:.4f}, \
                 \ntrain top-5 acc: {train_accs[5][-1]:.4f}, train top-10 acc: {train_accs[10][-1]:.4f}, \
                 \ntrain top-20 acc: {train_accs[20][-1]:.4f}, train top-50 acc: {train_accs[50][-1]:.4f}, \
-                \nvalid loss: {valid_losses[-1]:.4f}, valid top-1 acc: {val_accs[1][-1]:.4f} \
+                \nvalid loss: N/A, valid top-1 acc: {val_accs[1][-1]:.4f} \
                 \nvalid top-2 acc: {val_accs[2][-1]:.4f}, valid top-3 acc: {val_accs[3][-1]:.4f}, \
                 \nvalid top-5 acc: {val_accs[5][-1]:.4f}, valid top-10 acc: {val_accs[10][-1]:.4f}, \
                 \nvalid top-20 acc: {val_accs[20][-1]:.4f}, valid top-50 acc: {val_accs[50][-1]:.4f}, \
-            \n"
+                \nvalid top-100 acc: {val_accs[100][-1]:.4f}, \
+            \n" # {valid_losses[-1]:.4f}
         logging.info(message)
 
     logging.info(f'Finished training, total time (minutes): {(time.time() - start) / 60}')
@@ -290,7 +308,7 @@ def test(model, args):
         DATA_FOLDER / f"{args.csv_prefix}_test.csv", 
         index_col=None, dtype='str'
     )
-    k_to_calc = [1, 2, 3, 5, 10, 20, 50]
+    k_to_calc = [1, 2, 3, 5, 10, 20, 50, 100]
 
     model.eval()
     with torch.no_grad():
@@ -302,9 +320,15 @@ def test(model, args):
             inputs, labels = inputs.to(device), labels.to(device)
 
             outputs = model(inputs)
-            loss = criterion(outputs, labels)
+            # outputs = torch.where(
+            #     (labels.view(-1, 1).expand_as(outputs) < len(templates_filtered)), outputs, torch.tensor([0.], device=outputs.device)
+            # )
+            # labels = torch.where(
+            #     (labels < len(templates_filtered)), labels, torch.tensor([0.], device=labels.device).long()
+            # )
+            # loss = criterion(outputs, labels)
 
-            test_loss += loss.item()
+            # test_loss += loss.item()
             test_seen += labels.shape[0]
             outputs = nn.Softmax(dim=-1)(outputs)
 
@@ -312,7 +336,7 @@ def test(model, args):
                 batch_preds = torch.topk(outputs, k=k, dim=1)[1]
                 test_correct[k] += torch.where(batch_preds == labels.view(-1,1).expand_as(batch_preds))[0].shape[0]
 
-            test_loader.set_description(f"testing: loss={test_loss/test_seen:.4f}, top-1 acc={test_correct[1]/test_seen:.4f}")
+            test_loader.set_description(f"testing: top-1 acc={test_correct[1]/test_seen:.4f}") # loss={test_loss/test_seen:.4f}
             test_loader.refresh()
 
             # display some examples + model predictions/labels for monitoring model generalization
@@ -360,11 +384,12 @@ def test(model, args):
                 logging.info('\nIndex out of range (last minibatch)')
 
     message = f" \
-    \ntest loss: {test_loss/test_seen:.4f}, test top-1 acc: {test_correct[1]/test_seen:.4f} \
-    \nvtest top-2 acc: {test_correct[2]/test_seen:.4f}, test top-3 acc: {test_correct[3]/test_seen:.4f}, \
+    \ntest top-1 acc: {test_correct[1]/test_seen:.4f} \
+    \ntest top-2 acc: {test_correct[2]/test_seen:.4f}, test top-3 acc: {test_correct[3]/test_seen:.4f}, \
     \ntest top-5 acc: {test_correct[5]/test_seen:.4f}, test top-10 acc: {test_correct[10]/test_seen:.4f}, \
     \ntest top-20 acc: {test_correct[20]/test_seen:.4f}, test top-50 acc: {test_correct[50]/test_seen:.4f}, \
-    \n"
+    \ntest top-100 acc: {test_correct[100]/test_seen:.4f}, \
+    \n" # \ntest loss: {test_loss/test_seen:.4f}, 
     logging.info(message)
     logging.info('Finished Testing')
 
@@ -438,6 +463,7 @@ if __name__ == '__main__':
     if args.csv_prefix is None:
         args.csv_prefix = f'50k_{args.fp_size}dim_{args.radius}rad_csv'
 
+    logging.info(f'{args}')
     if args.do_train:
         model = train(args)
     else:
