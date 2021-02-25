@@ -66,7 +66,7 @@ def gen_prod_fps(args):
         for result in tqdm(pool.imap(gen_prod_fps_partial, clean_rxnsmi_phase),
                             total=len(clean_rxnsmi_phase), desc='Processing rxn_smi'):
             prod_smi_nomap, prod_fp = result
-            hase_prod_smi_nomap.append(prod_smi_nomap)
+            phase_prod_smi_nomap.append(prod_smi_nomap)
             phase_rxn_prod_fps.append(prod_fp)
 
         # these are the input data into the network
