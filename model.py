@@ -62,11 +62,11 @@ class Highway(nn.Module):
         return x
 
 # in the Nature paper, ELU non-linearity was used
-class TemplateNN(nn.Module):
+class TemplateNN_Highway(nn.Module):
     def __init__(self, output_size, size=512, num_layers_body=5, 
                 dropout_head=0.3, dropout_body=0.1,
                 f=F.elu, input_size=32681):
-        super(TemplateNN, self).__init__()
+        super(TemplateNN_Highway, self).__init__()
         self.highway_head = Highway(
                 size=size, num_layers=1, f=f, dropout=dropout_head, 
                 head=True, input_size=input_size
@@ -86,4 +86,21 @@ class TemplateNN(nn.Module):
             embedding = self.highway_body(self.highway_head(fp))
         else:
             embedding = self.highway_head(fp)
+        return self.classifier(embedding).squeeze(dim=1)
+
+class TemplateNN_FC(nn.Module):
+    ''' Following Segler's 2017 paper, we also try the one-layer (512) ELU FC network, as it may give better results on USPTO-50K
+    '''
+    def __init__(self, output_size, size=512,
+                dropout=0.1, input_size=32681):
+        super(TemplateNN_FC, self).__init__()
+        self.fc = nn.Sequential(*
+                    [nn.Linear(input_size, size),
+                    nn.ELU(),
+                    nn.Dropout(dropout)]
+                )
+        self.classifier = nn.Linear(size, output_size)
+
+    def forward(self, fp):
+        embedding = self.fc(fp)
         return self.classifier(embedding).squeeze(dim=1)

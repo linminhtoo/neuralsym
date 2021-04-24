@@ -49,12 +49,23 @@ def infer_all(args):
         CHECKPOINT_FOLDER / f"{args.expt_name}.pth.tar",
         map_location=device,
     )
-    model = TemplateNN(
-        output_size=len(templates_filtered),
-        size=args.hidden_size,
-        num_layers_body=args.depth,
-        input_size=args.fp_size
-    )
+
+    if args.model == 'Highway':
+        model = TemplateNN_Highway(
+            output_size=len(templates_filtered),
+            size=args.hidden_size,
+            num_layers_body=args.depth,
+            input_size=args.fp_size
+        )
+    elif args.model == 'FC':
+        model = TemplateNN_FC(
+            output_size=len(templates_filtered),
+            size=args.hidden_size,
+            input_size=args.fp_size
+        )
+    else:
+        raise ValueError('Unrecognized model name')
+
     model.load_state_dict(checkpoint["state_dict"])
     model.to(device)
 
@@ -81,7 +92,7 @@ def infer_all(args):
             preds = torch.cat(preds, dim=0).squeeze(dim=-1).cpu().numpy()
         logging.info(f'preds.shape: {preds.shape}')
         np.save(
-            DATA_FOLDER / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{phase}",
+            DATA_FOLDER / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}",
             preds
         )
         logging.info(f'Saved preds of {phase} as npy!')
@@ -131,7 +142,7 @@ def compile_into_csv(args):
 
     for phase in args.phases:
         # load predictions npy files
-        preds = np.load(DATA_FOLDER / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{phase}.npy")
+        preds = np.load(DATA_FOLDER / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}.npy")
 
         # load mapped_rxn_smi
         with open(DATA_FOLDER / f'{args.rxn_smi_prefix}_{phase}.pickle', 'rb') as f:
@@ -175,9 +186,9 @@ def compile_into_csv(args):
             proposed_precs_phase.append(seen)
             proposed_precs_phase_withdups.append(precursors)
 
-        with open(DATA_FOLDER / f'precs_{phase}.pickle', 'wb') as f:
+        with open(DATA_FOLDER / f'precs_{args.seed}_{phase}.pickle', 'wb') as f:
             pickle.dump(proposed_precs_phase_withdups, f)
-        with open(DATA_FOLDER / f'seen_{phase}.pickle', 'wb') as f:
+        with open(DATA_FOLDER / f'seen_{args.seed}_{phase}.pickle', 'wb') as f:
             pickle.dump(proposed_precs_phase, f)
         
         dup_count /= len(clean_rxnsmi_phase)
@@ -212,7 +223,7 @@ def compile_into_csv(args):
         analyse_proposed(
             prod_smiles_phase,
             prod_smiles_mapped_phase,
-            proposals_phase, # this func needs dict {mapped_prod_smi: proposals}
+            proposals_phase, # this func needs this to be a dict {mapped_prod_smi: proposals}
         )
         
         combined = {} 
@@ -250,7 +261,7 @@ def compile_into_csv(args):
 
         phase_dataframe.to_csv(
             DATA_FOLDER / 
-            f'neuralsym_{args.topk}topk_{args.maxk}maxk_noGT_{phase}.csv',
+            f'neuralsym_{args.topk}topk_{args.maxk}maxk_noGT_{args.seed}_{phase}.csv',
             index=False
         )
         logging.info(f'Saved proposals of {phase} as CSV!')
@@ -360,6 +371,8 @@ def parse_args():
                         help="csv file of various metadata about the rxn",
                         type=str)
     # metadata
+    parser.add_argument("--seed", help="Seed used for model training", type=int, default=1337)
+    parser.add_argument("--model", help="['Highway', 'FC']", type=str, default='Highway')
     parser.add_argument("--phases", help="Phases to do inference on", type=str, 
                         default=['train', 'valid', 'test'], nargs='+')
     parser.add_argument("--min_freq", help="Min freq of template", type=int, default=1)

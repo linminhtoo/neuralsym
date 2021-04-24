@@ -10,7 +10,7 @@ I have done some pre-processing on the original data from Schneider et al. to ge
 to extract templates from training data, get the labels & so on. I have significantly optimized the code & it automatically parallelizes, so it shouldn't take long to prepare all the data on a standard 8/16-core machine, maybe 15 mins total (slowest step is the variance thresholding of 1 mil-dim fingerprints to 32681-dim fingerprints)
 
 ## Training
-I have provided a sample ```train.sh``` file with sensible hyperparameters that achieved ~40% top-1 valid/test accuracies. Just do
+I have provided a sample ```train.sh``` file with sensible hyperparameters that achieved ~40% top-1 valid/test  in terms of template-matching accuracy. For reactant matching accuracy (this is what we ultimately care about), I can get ~45.5% top-1 and 87.4% top-50 accuracy, calculated using ```infer_all.py```. Just do
 ```
     bash -i train.sh
 ```

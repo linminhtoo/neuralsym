@@ -23,7 +23,7 @@ from scipy import sparse
 from tqdm import tqdm
 from rdkit import RDLogger
 
-from model import TemplateNN
+from model import TemplateNN_Highway, TemplateNN_FC
 from dataset import FingerprintDataset
 
 DATA_FOLDER = Path(__file__).resolve().parent / 'data'
@@ -50,12 +50,22 @@ def train(args):
             templates_filtered.append(pa)
     logging.info(f'Total number of template patterns: {len(templates_filtered)}')
 
-    model = TemplateNN(
-        output_size=len(templates_filtered),
-        size=args.hidden_size,
-        num_layers_body=args.depth,
-        input_size=args.fp_size
-    )
+    if args.model == 'Highway':
+        model = TemplateNN_Highway(
+            output_size=len(templates_filtered),
+            size=args.hidden_size,
+            num_layers_body=args.depth,
+            input_size=args.fp_size
+        )
+    elif args.model == 'FC':
+        model = TemplateNN_FC(
+            output_size=len(templates_filtered),
+            size=args.hidden_size,
+            input_size=args.fp_size
+        )
+    else:
+        raise ValueError('Unrecognized model name')
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     logging.info(f'Using {device} device')
     model = model.to(device)
@@ -355,7 +365,7 @@ def test(model, args):
                         rxn_pred_temp = templates_filtered[rxn_pred_class]
                         rxn_true_temp_idx = int(proposals_data_test.iloc[idxs[rxn_idx].item(), 4])
                         if rxn_true_temp_idx < len(templates_filtered) and rxn_true_class < len(templates_filtered):
-                            rxn_true_temp = templates_filtered[rxn_true_temp_idx]]
+                            rxn_true_temp = templates_filtered[rxn_true_temp_idx]
                             rxn_true_score = outputs[rxn_idx, rxn_true_class].item()
                         else:
                             rxn_true_temp = 'Template not in training data'
@@ -400,6 +410,7 @@ def parse_args():
     parser.add_argument("--expt_name", help="experiment name", type=str, default="")
     parser.add_argument("--do_train", help="whether to train", action="store_true")
     parser.add_argument("--do_test", help="whether to test", action="store_true")
+    parser.add_argument("--model", help="['Highway', 'FC']", type=str, default='Highway')
     # file names
     parser.add_argument("--log_file", help="log_file", type=str, default="train")
     parser.add_argument("--templates_file", help="templates_file", type=str, default="50k_training_templates")
@@ -466,12 +477,22 @@ if __name__ == '__main__':
             CHECKPOINT_FOLDER / f"{args.expt_name}.pth.tar",
             map_location=device,
         )
-        model = TemplateNN(
-            output_size=len(templates_filtered),
-            size=args.hidden_size,
-            num_layers_body=args.depth,
-            input_size=args.fp_size
-        )
+        if args.model == 'Highway':
+            model = TemplateNN_Highway(
+                output_size=len(templates_filtered),
+                size=args.hidden_size,
+                num_layers_body=args.depth,
+                input_size=args.fp_size
+            )
+        elif args.model == 'FC':
+            model = TemplateNN_FC(
+                output_size=len(templates_filtered),
+                size=args.hidden_size,
+                input_size=args.fp_size
+            )
+        else:
+            raise ValueError('Unrecognized model name')
+
         model.load_state_dict(checkpoint["state_dict"])
         model.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
 
