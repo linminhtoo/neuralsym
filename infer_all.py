@@ -25,7 +25,7 @@ from tqdm import tqdm
 from rdkit import RDLogger
 from rdkit import Chem
 
-from model import TemplateNN
+from model import TemplateNN_Highway, TemplateNN_FC
 from dataset import FingerprintDataset
 
 DATA_FOLDER = Path(__file__).resolve().parent / 'data'
