@@ -17,7 +17,7 @@ from tqdm import tqdm
 from rdkit import RDLogger
 from rdkit import Chem
 
-from model import TemplateNN
+from model import TemplateNN_Highway
 from prepare_data import mol_smi_to_count_fp
 from infer_config import infer_config
 
@@ -48,7 +48,7 @@ class Proposer:
             CHECKPOINT_FOLDER / f"{infer_config['expt_name']}.pth.tar",
             map_location=self.device,
         )
-        model = TemplateNN(
+        model = TemplateNN_Highway(
             output_size=len(self.templates_filtered),
             size=infer_config['hidden_size'],
             num_layers_body=infer_config['depth'],
