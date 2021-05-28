@@ -1,5 +1,5 @@
 # Template Relevance Network for Retrosynthesis
-A faithful (to the best of my ability) re-implementation (because the authors did not release the source code) of the expansion network in Segler's seminal [Nature paper](https://www.nature.com/articles/nature25978): **"Planning chemical syntheses with deep nueral networks and symbolic AI"**, which they [first published here](https://chemistry-europe.onlinelibrary.wiley.com/doi/abs/10.1002/chem.201605499) in **"Neural-Symbolic Machine Learning for Retrosynthesis and Reaction Prediction"**. In essence, NeuralSym is a feedforward network using Highway-ELU blocks, taking as input a product fingerprint (ECFP4), and producing as output an array of logits, one value for each template extracted from the training dataset. A softmax classification can be done across these logits to determine the most promising reaction template, which can be passed through RDChiral to generate the predicted precursors for this product. 
+A faithful (to the best of my ability) re-implementation (because the authors did not release the source code) of the expansion network in Segler's seminal [Nature paper](https://www.nature.com/articles/nature25978): **"Planning chemical syntheses with deep neural networks and symbolic AI"**, which they [first published here](https://chemistry-europe.onlinelibrary.wiley.com/doi/abs/10.1002/chem.201605499) in **"Neural-Symbolic Machine Learning for Retrosynthesis and Reaction Prediction"**. In essence, NeuralSym is a feedforward network using Highway-ELU blocks, taking as input a product fingerprint (ECFP4), and producing as output an array of logits, one value for each template extracted from the training dataset. A softmax classification can be done across these logits to determine the most promising reaction template, which can be passed through RDChiral to generate the predicted precursors for this product. 
 
 ## Data files
 This model has been re-trained on USPTO-50K dataset, which has ~50,000 atom-mapped reactions from US Patent data.
@@ -69,9 +69,10 @@ Tested on Python 3.6
     conda install -y rdkit -c rdkit
 
     pip install -e "git://github.com/connorcoley/rdchiral.git#egg=rdchiral"
-    
+```
+
 ## Citation
-Please cite Segler's original paper
+Please cite Segler et al.'s original paper
 ```
 @article{segler2017neural,
   title={Neural-symbolic machine learning for retrosynthesis and reaction prediction},
