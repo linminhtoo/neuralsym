@@ -24,6 +24,7 @@ from scipy import sparse
 from tqdm import tqdm
 from rdkit import RDLogger
 from rdkit import Chem
+from rdkit.Chem import AllChem
 
 from model import TemplateNN_Highway, TemplateNN_FC
 from dataset import FingerprintDataset
@@ -104,19 +105,29 @@ def gen_precs(templates_filtered, preds, phase_topk, task):
     pred_temp_idxs = preds[i]
     for idx in pred_temp_idxs:
         template = templates_filtered[idx]
-        
-        rxn = rdchiralReaction(template)
-        prod = rdchiralReactants(prod_smi_nomap)
+
         try:
-            precs = rdchiralRun(rxn, prod)
+            """rdchiral version"""
+            # rxn = rdchiralReaction(template)
+            # prod = rdchiralReactants(prod_smi_nomap)
+            # precs = rdchiralRun(rxn, prod)
+            # precursors.extend(precs)
+            """rdkit version"""
+            rxn = AllChem.ReactionFromSmarts(template)
+            prod = [Chem.MolFromSmiles(prod_smi_nomap)]
+            precs = rxn.RunReactants(prod)
+            precs = list(set([".".join([Chem.MolToSmiles(p) for p in prec]) for prec in precs]))
+            # canonicalize all predictions
+            precs = list(Chem.CanonSmiles(prec) for prec in precs)
             precursors.extend(precs)
         except:
             continue
 
     # remove duplicate predictions
     seen = []
-    for prec in precursors: # canonicalize all predictions
-        prec = Chem.MolToSmiles(Chem.MolFromSmiles(prec), True)
+    for prec in precursors:
+        # canonicalize all predictions
+        # prec = Chem.MolToSmiles(Chem.MolFromSmiles(prec), True)
         if prec not in seen:
             seen.append(prec)
         else:
