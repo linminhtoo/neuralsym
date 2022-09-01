@@ -73,7 +73,7 @@ Tested on Python 3.6
 
 ## Citation
 Please cite Segler et al.'s original paper
-```
+```bibtex
 @article{segler2017neural,
   title={Neural-symbolic machine learning for retrosynthesis and reaction prediction},
   author={Segler, Marwin HS and Waller, Mark P},
